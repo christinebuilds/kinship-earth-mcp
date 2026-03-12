@@ -4,7 +4,7 @@ version = "0.1.0"
 requires-python = ">=3.12"
 
 [tool.uv.workspace]
-members = ["shared", "servers/neonscience", "servers/obis", "servers/era5", "servers/orchestrator", "launcher"]
+members = ["shared", "servers/neonscience", "servers/obis", "servers/era5", "servers/orchestrator", "launcher", "webapp"]
 
 [dependency-groups]
 dev = ["pytest>=8.0", "pytest-asyncio>=0.23"]

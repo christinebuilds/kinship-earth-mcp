@@ -1,0 +1,28 @@
+[project]
+name = "kinship-webapp"
+version = "0.1.0"
+requires-python = ">=3.12"
+description = "Web chat interface for Kinship Earth ecological data"
+license = { text = "MIT" }
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "anthropic>=0.42",
+    "kinship-shared",
+    "neonscience-mcp",
+    "obis-mcp",
+    "era5-mcp",
+]
+
+[tool.uv.sources]
+kinship-shared = { workspace = true }
+neonscience-mcp = { workspace = true }
+obis-mcp = { workspace = true }
+era5-mcp = { workspace = true }
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
