@@ -77,10 +77,20 @@ class OBISAdapter(EcologicalAdapter):
         logger.info("OBIS search: taxon=%s, lat=%s, lng=%s, radius_km=%s", params.taxon, params.lat, params.lng, params.radius_km)
         query: dict = {"size": params.limit}
 
-        if params.lat is not None and params.lng is not None and params.radius_km is not None:
-            query["lat"] = params.lat
-            query["lon"] = params.lng
-            query["radius"] = params.radius_km
+        has_geo = params.lat is not None and params.lng is not None and params.radius_km is not None
+
+        if has_geo:
+            if params.taxon:
+                # OBIS ignores lat/lon/radius when scientificname is set.
+                # Use a WKT bounding box via the `geometry` param instead,
+                # then apply exact radius filtering client-side.
+                bbox = _radius_to_bbox(params.lat, params.lng, params.radius_km)
+                query["geometry"] = bbox
+                logger.info("OBIS: using geometry bbox (taxon+geo combo): %s", bbox)
+            else:
+                query["lat"] = params.lat
+                query["lon"] = params.lng
+                query["radius"] = params.radius_km
 
         if params.taxon:
             query["scientificname"] = params.taxon
@@ -146,6 +156,18 @@ class OBISAdapter(EcologicalAdapter):
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
+def _radius_to_bbox(lat: float, lng: float, radius_km: float) -> str:
+    """Convert a center point + radius to a WKT POLYGON bounding box for OBIS geometry param."""
+    # Approximate degrees per km at this latitude
+    lat_delta = radius_km / 111.0
+    lng_delta = radius_km / (111.0 * math.cos(math.radians(lat)))
+    min_lat = max(lat - lat_delta, -90)
+    max_lat = min(lat + lat_delta, 90)
+    min_lng = max(lng - lng_delta, -180)
+    max_lng = min(lng + lng_delta, 180)
+    return f"POLYGON(({min_lng} {min_lat},{max_lng} {min_lat},{max_lng} {max_lat},{min_lng} {max_lat},{min_lng} {min_lat}))"
+
 
 def _within_radius(lat1: float, lng1: float, lat2: float, lng2: float, radius_km: float) -> bool:
     """Haversine distance check — returns True if (lat2, lng2) is within radius_km of (lat1, lng1)."""
