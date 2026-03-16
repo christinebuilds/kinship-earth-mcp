@@ -1,0 +1,155 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-121.8714, 36.6178]
+      },
+      "properties": {
+        "scientific_name": "Megaptera novaeangliae",
+        "common_name": "Humpback Whale",
+        "observed_at": "2025-09-15T14:32:00Z",
+        "quality_grade": "research",
+        "source": "iNaturalist",
+        "observation_id": "inat-198234567"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-121.9452, 36.5831]
+      },
+      "properties": {
+        "scientific_name": "Enhydra lutris nereis",
+        "common_name": "Southern Sea Otter",
+        "observed_at": "2025-10-02T09:15:00Z",
+        "quality_grade": "research",
+        "source": "iNaturalist",
+        "observation_id": "inat-201456789"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-122.0018, 36.6193]
+      },
+      "properties": {
+        "scientific_name": "Mirounga angustirostris",
+        "common_name": "Northern Elephant Seal",
+        "observed_at": "2025-11-20T11:45:00Z",
+        "quality_grade": "research",
+        "source": "iNaturalist",
+        "observation_id": "inat-205678901"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-121.7893, 36.8024]
+      },
+      "properties": {
+        "scientific_name": "Eschrichtius robustus",
+        "common_name": "Gray Whale",
+        "observed_at": "2025-12-08T16:20:00Z",
+        "quality_grade": "research",
+        "source": "OBIS",
+        "observation_id": "obis-a3f2c891-4e5b"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-121.9127, 36.5542]
+      },
+      "properties": {
+        "scientific_name": "Dermochelys coriacea",
+        "common_name": "Leatherback Sea Turtle",
+        "observed_at": "2025-08-22T13:10:00Z",
+        "quality_grade": "research",
+        "source": "OBIS",
+        "observation_id": "obis-b7d1e234-9a8c"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-121.8561, 36.6387]
+      },
+      "properties": {
+        "scientific_name": "Mola mola",
+        "common_name": "Ocean Sunfish",
+        "observed_at": "2025-07-14T10:55:00Z",
+        "quality_grade": "verifiable",
+        "source": "iNaturalist",
+        "observation_id": "inat-189012345"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-121.9834, 36.6051]
+      },
+      "properties": {
+        "scientific_name": "Zalophus californianus",
+        "common_name": "California Sea Lion",
+        "observed_at": "2025-10-30T08:40:00Z",
+        "quality_grade": "research",
+        "source": "iNaturalist",
+        "observation_id": "inat-203890123"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-121.7956, 36.7412]
+      },
+      "properties": {
+        "scientific_name": "Phoca vitulina",
+        "common_name": "Harbor Seal",
+        "observed_at": "2025-09-05T15:22:00Z",
+        "quality_grade": "research",
+        "source": "iNaturalist",
+        "observation_id": "inat-197345678"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-122.0245, 36.5678]
+      },
+      "properties": {
+        "scientific_name": "Tursiops truncatus",
+        "common_name": "Common Bottlenose Dolphin",
+        "observed_at": "2025-11-12T12:08:00Z",
+        "quality_grade": "research",
+        "source": "OBIS",
+        "observation_id": "obis-c4e5f678-1b2a"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-121.9023, 36.6289]
+      },
+      "properties": {
+        "scientific_name": "Chrysaora fuscescens",
+        "common_name": "Pacific Sea Nettle",
+        "observed_at": "2025-08-03T17:45:00Z",
+        "quality_grade": "research",
+        "source": "iNaturalist",
+        "observation_id": "inat-185678901"
+      }
+    }
+  ]
+}
