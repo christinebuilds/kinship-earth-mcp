@@ -66,7 +66,7 @@ async def neon_list_sites() -> list[dict]:
             "domain_name": s.get("domainName"),
             "state": s.get("stateCode"),
             "lat": s.get("siteLatitude"),
-            "lng": s.get("siteLongitude"),
+            "lon": s.get("siteLongitude"),
             "elevation_m": s.get("siteElevation"),
             "data_products_available": len(s.get("dataProducts", [])),
         }
@@ -100,7 +100,7 @@ async def neon_get_site(site_code: str) -> Optional[dict]:
         "state": site.get("stateCode"),
         "country": "United States",
         "lat": site.get("siteLatitude"),
-        "lng": site.get("siteLongitude"),
+        "lon": site.get("siteLongitude"),
         "elevation_m": site.get("siteElevation"),
         "data_products": [
             {"product_code": dp.get("dataProductCode"), "product_name": dp.get("dataProductTitle")}
@@ -149,7 +149,7 @@ async def neon_list_data_products(keyword: Optional[str] = None) -> list[dict]:
 async def neon_search_observations(
     site_code: Optional[str] = None,
     lat: Optional[float] = None,
-    lng: Optional[float] = None,
+    lon: Optional[float] = None,
     radius_km: Optional[float] = 100.0,
 ) -> list[dict]:
     """
@@ -161,8 +161,8 @@ async def neon_search_observations(
     Args:
         site_code: NEON site code to look up directly (e.g. 'WREF', 'HARV').
         lat: Latitude of the center point for geographic search.
-        lng: Longitude of the center point for geographic search.
-        radius_km: Search radius in kilometres (default 100km). Used with lat/lng.
+        lon: Longitude of the center point for geographic search (negative = West).
+        radius_km: Search radius in kilometres (default 100km). Used with lat/lon.
 
     Returns site information as EcologicalObservation-compatible records.
     """
@@ -170,7 +170,7 @@ async def neon_search_observations(
 
     params = SearchParams(
         lat=lat,
-        lng=lng,
+        lon=lon,
         radius_km=radius_km,
         site_id=site_code,
         limit=50,
@@ -182,7 +182,7 @@ async def neon_search_observations(
             "site_code": obs.location.site_id,
             "site_name": obs.location.site_name,
             "lat": obs.location.lat,
-            "lng": obs.location.lng,
+            "lon": obs.location.lng,
             "elevation_m": obs.location.elevation_m,
             "state": obs.location.state_province,
             "modality": obs.modality,

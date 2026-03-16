@@ -12,7 +12,7 @@ Run via HTTP:  uv run python -m obis_mcp.server
 
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any, Literal, Optional
 
 from mcp.server.fastmcp import FastMCP
 
@@ -51,13 +51,15 @@ async def obis_search_occurrences(
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
     limit: int = 20,
-) -> list[dict]:
+    offset: int = 0,
+    output_format: Literal["json", "geojson"] = "json",
+) -> list[dict] | dict:
     """
     Search OBIS for marine species occurrence records.
 
     OBIS holds 168M+ occurrence records for 166K+ marine species worldwide.
-    Use this to find where a species has been observed, or what species have
-    been recorded in a given ocean area.
+    Use this for marine/ocean species. For terrestrial biodiversity, prefer
+    inaturalist_search. For cross-source queries, use ecology_search on the orchestrator.
 
     Args:
         scientificname: Scientific name to search for, e.g. 'Delphinus delphis'
@@ -69,23 +71,32 @@ async def obis_search_occurrences(
         start_date: Start of date range, ISO 8601 format (e.g. '2015-01-01').
         end_date: End of date range, ISO 8601 format (e.g. '2023-12-31').
         limit: Maximum number of records to return (default 20, max 500).
+        offset: Number of results to skip for pagination (default 0).
+        output_format: "json" (default) returns a list of dicts.
+                       "geojson" returns a GeoJSON FeatureCollection.
 
-    Returns a list of occurrence records with taxonomy, location, date,
-    data quality, and provenance (including per-record license).
+    Example return (json): [{"id": "obis:abc-123", "taxon": {"scientific_name": "Delphinus delphis",
+    "common_name": "Common Dolphin"}, "location": {"lat": 36.7, "lon": -122.0},
+    "observed_at": "2023-06-15T00:00:00", "quality": {"tier": 2}}]
     """
-    from kinship_shared import SearchParams
+    from kinship_shared import SearchParams, observations_to_geojson
 
     params = SearchParams(
         lat=lat,
-        lng=lon,
+        lon=lon,
         radius_km=radius_km,
         taxon=scientificname,
         start_date=start_date,
         end_date=end_date,
         limit=limit,
+        offset=offset,
     )
-    observations = await _adapter.search(params)
-    return [_obs_to_dict(obs) for obs in observations]
+    observations_raw = await _adapter.search(params)
+    observations = [_obs_to_dict(obs) for obs in observations_raw]
+
+    if output_format == "geojson":
+        return observations_to_geojson(observations)
+    return observations
 
 
 @mcp.tool()
@@ -145,7 +156,7 @@ def _obs_to_dict(obs: Any) -> dict:
         } if taxon else None,
         "location": {
             "lat": loc.lat,
-            "lng": loc.lng,
+            "lon": loc.lng,
             "uncertainty_m": loc.uncertainty_m,
             "country": loc.country,
             "state_province": loc.state_province,

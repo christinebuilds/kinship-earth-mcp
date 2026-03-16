@@ -261,8 +261,16 @@ class SearchParams(BaseModel):
     """Parameters for querying observations across adapters."""
 
     lat: Optional[float] = None
-    lng: Optional[float] = None
+    lng: Optional[float] = Field(default=None, description="Longitude. Alias: lon.")
+    lon: Optional[float] = Field(default=None, description="Longitude alias for lng (preferred in scientific contexts).")
     radius_km: Optional[float] = Field(default=None, ge=0)
+
+    def model_post_init(self, __context: Any) -> None:
+        """Allow `lon` as an alias for `lng`."""
+        if self.lon is not None and self.lng is None:
+            self.lng = self.lon
+        elif self.lng is not None and self.lon is None:
+            self.lon = self.lng
     taxon: Optional[str] = Field(default=None, description="Scientific or common name.")
     taxon_id: Optional[int] = Field(default=None, description="GBIF taxon key.")
     site_id: Optional[str] = Field(default=None, description="Named site code, e.g. 'WREF'.")
