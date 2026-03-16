@@ -20,13 +20,16 @@ from pydantic import BaseModel, Field
 # ---------------------------------------------------------------------------
 
 SignalModality = Literal[
-    "acoustic",     # sound recordings, bioacoustics
-    "chemical",     # VOCs, soil chemistry, water chemistry
-    "electrical",   # plant electrophysiology, bioelectricity
-    "geospatial",   # satellite imagery, hyperspectral, LiDAR
-    "occurrence",   # species observation records
-    "sensor",       # continuous IoT/instrument data (soil moisture, flux, climate)
-    "visual",       # camera traps, photos, video
+    "acoustic",       # sound recordings, bioacoustics
+    "chemical",       # VOCs, soil chemistry, water chemistry
+    "electrical",     # plant electrophysiology, bioelectricity
+    "geospatial",     # satellite imagery, LiDAR
+    "hydrological",   # stream flow, water chemistry, eDNA (Phase 1C)
+    "movement",       # GPS telemetry, migration tracking (Phase 1C)
+    "occurrence",     # species observation records
+    "sensor",         # continuous IoT/instrument data (soil moisture, flux, climate)
+    "spectral",       # hyperspectral, multispectral remote sensing (Phase 1C)
+    "visual",         # camera traps, photos, video
 ]
 
 QualityGrade = Literal["research", "community", "casual", "raw"]
@@ -95,6 +98,14 @@ class Location(BaseModel):
     state_province: Optional[str] = Field(
         default=None,
         description="DwC: stateProvince."
+    )
+    watershed_id: Optional[str] = Field(
+        default=None,
+        description="Watershed identifier, e.g. USGS HUC-12 code. Enables watershed-level queries."
+    )
+    ecosystem_id: Optional[str] = Field(
+        default=None,
+        description="Ecosystem identifier from a recognized classification (e.g. EPA Level III Ecoregion)."
     )
 
 
@@ -172,6 +183,22 @@ class Provenance(BaseModel):
         default=None,
         description="DwC: collectionCode."
     )
+    care_status: Optional[Literal["public", "research", "restricted", "sovereign"]] = Field(
+        default=None,
+        description=(
+            "CARE Principles data governance status. "
+            "'sovereign' = Indigenous data requiring community consent for use. "
+            "Built into schema from day one per Kinship Earth design principles."
+        )
+    )
+    sensor_id: Optional[str] = Field(
+        default=None,
+        description="Identifier of the specific sensor or instrument that produced this data."
+    )
+    collection_method: Optional[str] = Field(
+        default=None,
+        description="Method of data collection. E.g. 'autonomous_recorder', 'visual_survey', 'satellite_remote_sensing'."
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -240,6 +267,12 @@ class EcologicalObservation(BaseModel):
     raw: Optional[dict] = Field(
         default=None,
         description="Original API response preserved verbatim for full traceability."
+    )
+
+    # Temporal metadata (Phase 1C — supports streaming in Phase 2)
+    temporal_resolution: Optional[str] = Field(
+        default=None,
+        description="Reporting frequency of source. E.g. '15min', 'daily', '5-day', 'event-driven'."
     )
 
     # Future: intelligence layer
