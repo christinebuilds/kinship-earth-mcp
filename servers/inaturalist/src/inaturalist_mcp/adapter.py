@@ -26,6 +26,8 @@ from kinship_shared import (
     Provenance,
     SearchParams,
 )
+import httpx
+
 from kinship_shared.retry import http_get_with_retry
 
 BASE_URL = "https://api.inaturalist.org/v1"
@@ -103,10 +105,10 @@ class INaturalistAdapter(EcologicalAdapter):
         else:
             api_params["verifiable"] = "true"
 
-        data = await http_get_with_retry(
-            f"{BASE_URL}/observations",
-            params=api_params,
-        )
+        async with httpx.AsyncClient(timeout=30) as client:
+            resp = await http_get_with_retry(client, f"{BASE_URL}/observations", params=api_params)
+            resp.raise_for_status()
+            data = resp.json()
 
         observations = []
         if isinstance(data, dict) and "results" in data:
@@ -119,7 +121,10 @@ class INaturalistAdapter(EcologicalAdapter):
 
     async def get_by_id(self, source_id: str) -> Optional[EcologicalObservation]:
         """Fetch a specific iNaturalist observation by ID."""
-        data = await http_get_with_retry(f"{BASE_URL}/observations/{source_id}")
+        async with httpx.AsyncClient(timeout=30) as client:
+            resp = await http_get_with_retry(client, f"{BASE_URL}/observations/{source_id}")
+            resp.raise_for_status()
+            data = resp.json()
         if isinstance(data, dict) and "results" in data and data["results"]:
             return self._record_to_observation(data["results"][0])
         return None

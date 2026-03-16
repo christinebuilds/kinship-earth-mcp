@@ -28,6 +28,8 @@ from kinship_shared import (
     Provenance,
     SearchParams,
 )
+import httpx
+
 from kinship_shared.retry import http_get_with_retry
 
 # eBird API 2.0 base URL
@@ -110,11 +112,15 @@ class EBirdAdapter(EcologicalAdapter):
                 "back": 14,  # days back (1-30)
             }
 
-            data = await http_get_with_retry(
-                endpoint,
-                params=api_params,
-                headers={"X-eBirdApiToken": self._api_key},
-            )
+            headers = {"X-eBirdApiToken": self._api_key}
+            async with httpx.AsyncClient(timeout=30, headers=headers) as client:
+                resp = await http_get_with_retry(
+                    client,
+                    endpoint,
+                    params=api_params,
+                )
+                resp.raise_for_status()
+                data = resp.json()
 
             if isinstance(data, list):
                 for record in data:
