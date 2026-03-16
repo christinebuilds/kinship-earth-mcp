@@ -116,6 +116,8 @@ async def run_search(
     obis,
     neon,
     era5,
+    inat=None,
+    ebird=None,
 ) -> dict:
     """
     Unified ecological search across all Kinship Earth data sources.
@@ -144,6 +146,20 @@ async def run_search(
     if lat is not None and lon is not None:
         tasks["neon"] = neon.search(SearchParams(
             lat=lat, lng=lon, radius_km=radius_km or 200, limit=10,
+        ))
+
+    # iNaturalist — terrestrial + freshwater species (all taxa)
+    if inat and (scientificname or (lat is not None and lon is not None)):
+        tasks["inat"] = inat.search(SearchParams(
+            taxon=scientificname, lat=lat, lng=lon, radius_km=radius_km,
+            start_date=start_date, end_date=end_date, limit=limit,
+        ))
+
+    # eBird — bird observations (if API key is configured)
+    if ebird and getattr(ebird, '_api_key', None) and (lat is not None and lon is not None):
+        tasks["ebird"] = ebird.search(SearchParams(
+            taxon=scientificname, lat=lat, lng=lon, radius_km=radius_km,
+            limit=limit,
         ))
 
     if include_climate and lat is not None and lon is not None and start_date and end_date:
@@ -203,6 +219,32 @@ async def run_search(
             })
         obis_occurrences.sort(key=lambda x: x["relevance"]["score"], reverse=True)
 
+    # Format iNaturalist results with relevance scores
+    inat_occurrences = []
+    for source_key in ("inat", "ebird"):
+        if source_key in results and isinstance(results[source_key], list):
+            for obs in results[source_key]:
+                relevance = score_observation(obs, scoring_params)
+                inat_occurrences.append({
+                    "id": obs.id,
+                    "source": source_key,
+                    "scientific_name": obs.taxon.scientific_name if obs.taxon else None,
+                    "common_name": obs.taxon.common_name if obs.taxon else None,
+                    "lat": obs.location.lat,
+                    "lng": obs.location.lng,
+                    "observed_at": obs.observed_at.isoformat(),
+                    "quality_tier": obs.quality.tier,
+                    "quality_grade": obs.quality.grade,
+                    "media_url": obs.media_url,
+                    "source_url": obs.provenance.original_url,
+                    "relevance": {
+                        "score": relevance.score,
+                        "geo_distance_km": relevance.geo_distance_km,
+                        "explanation": relevance.explanation,
+                    },
+                })
+    inat_occurrences.sort(key=lambda x: x["relevance"]["score"], reverse=True)
+
     # Format NEON results
     neon_sites = []
     if "neon" in results and isinstance(results["neon"], list):
@@ -258,9 +300,13 @@ async def run_search(
             f"widen date range, or search at genus/family level."
         )
 
+    # Merge all species occurrences (OBIS marine + iNat/eBird terrestrial)
+    all_occurrences = obis_occurrences + inat_occurrences
+    all_occurrences.sort(key=lambda x: x["relevance"]["score"], reverse=True)
+
     return {
-        "species_occurrences": obis_occurrences,
-        "species_count": len(obis_occurrences),
+        "species_occurrences": all_occurrences,
+        "species_count": len(all_occurrences),
         "neon_sites": neon_sites,
         "neon_site_count": len(neon_sites),
         "climate": climate,
@@ -268,9 +314,13 @@ async def run_search(
     }
 
 
-async def run_describe_sources(*, neon, obis, era5) -> dict:
+async def run_describe_sources(*, neon, obis, era5, inat=None, ebird=None) -> dict:
     """Describe all available ecological data sources and their capabilities."""
     sources = [neon, obis, era5]
+    if inat:
+        sources.append(inat)
+    if ebird and getattr(ebird, '_api_key', None):
+        sources.append(ebird)
     descriptions = []
 
     for adapter in sources:

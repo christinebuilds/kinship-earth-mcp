@@ -27,6 +27,8 @@ from mcp.server.fastmcp import FastMCP
 from neonscience_mcp.adapter import NeonAdapter
 from obis_mcp.adapter import OBISAdapter
 from era5_mcp.adapter import ERA5Adapter
+from inaturalist_mcp.adapter import INaturalistAdapter
+from ebird_mcp.adapter import EBirdAdapter
 
 from kinship_shared import (
     run_describe_sources,
@@ -56,6 +58,8 @@ mcp = FastMCP(
 _neon = NeonAdapter(api_token=os.environ.get("NEON_API_TOKEN"))
 _obis = OBISAdapter()
 _era5 = ERA5Adapter()
+_inat = INaturalistAdapter()
+_ebird = EBirdAdapter(api_key=os.environ.get("EBIRD_API_KEY"))
 
 
 # ---------------------------------------------------------------------------
@@ -137,6 +141,7 @@ async def ecology_search(
         radius_km=radius_km, start_date=start_date, end_date=end_date,
         include_climate=include_climate, limit=limit,
         obis=_obis, neon=_neon, era5=_era5,
+        inat=_inat, ebird=_ebird,
     )
 
 
@@ -150,7 +155,7 @@ async def ecology_describe_sources() -> dict:
     requirements. Use this to understand what data is available before
     searching.
     """
-    return await run_describe_sources(neon=_neon, obis=_obis, era5=_era5)
+    return await run_describe_sources(neon=_neon, obis=_obis, era5=_era5, inat=_inat, ebird=_ebird)
 
 
 # ---------------------------------------------------------------------------

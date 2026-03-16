@@ -11,6 +11,8 @@ dependencies = [
     "neonscience-mcp",
     "obis-mcp",
     "era5-mcp",
+    "ebird-mcp",
+    "inaturalist-mcp",
 ]
 
 [tool.uv.sources]
@@ -18,6 +20,8 @@ kinship-shared = { workspace = true }
 neonscience-mcp = { workspace = true }
 obis-mcp = { workspace = true }
 era5-mcp = { workspace = true }
+ebird-mcp = { workspace = true }
+inaturalist-mcp = { workspace = true }
 
 [build-system]
 requires = ["hatchling"]

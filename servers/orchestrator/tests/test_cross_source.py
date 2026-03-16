@@ -217,12 +217,13 @@ async def test_describe_sources_lists_all_adapters():
     """
     result = await ecology_describe_sources()
 
-    assert result["source_count"] == 3, f"Expected 3 sources, got {result['source_count']}"
+    assert result["source_count"] >= 3, f"Expected at least 3 sources, got {result['source_count']}"
 
     source_ids = [s["id"] for s in result["sources"]]
     assert "neonscience" in source_ids, "NEON must be listed"
     assert "obis" in source_ids, "OBIS must be listed"
     assert "era5" in source_ids, "ERA5 must be listed"
+    assert "inaturalist" in source_ids, "iNaturalist must be listed"
 
 
 @pytest.mark.asyncio
