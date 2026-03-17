@@ -20,7 +20,7 @@ Run via HTTP:  uv run python -m kinship_orchestrator.server
 from __future__ import annotations
 
 import os
-from typing import Optional
+from typing import Literal, Optional
 
 from mcp.server.fastmcp import FastMCP
 
@@ -113,36 +113,53 @@ async def ecology_search(
     end_date: Optional[str] = None,
     include_climate: bool = True,
     limit: int = 20,
+    offset: int = 0,
+    output_format: Literal["json", "geojson"] = "json",
 ) -> dict:
     """
     Unified ecological search across all Kinship Earth data sources.
 
     Searches OBIS (marine species) and NEON (terrestrial sites) simultaneously,
     and optionally adds ERA5 climate context for the search area and time period.
-    This is the single entry point for ecological data discovery.
+    This is the single entry point for cross-source ecological data discovery.
+
+    For source-specific queries with more control, use the individual servers:
+    obis_search_occurrences (marine), inaturalist_search (all taxa),
+    ebird_recent_observations (birds, real-time).
 
     Args:
         scientificname: Scientific name to search for (e.g. 'Delphinus delphis').
                         Searches OBIS occurrence records.
         lat: Latitude for geographic search (decimal degrees).
-        lon: Longitude for geographic search. Negative = West.
+        lon: Longitude for geographic search (negative = West).
         radius_km: Search radius in kilometres.
         start_date: Start of date range (ISO 8601, e.g. '2020-01-01').
         end_date: End of date range (ISO 8601, e.g. '2023-12-31').
         include_climate: If true and lat/lon/dates are provided, include ERA5
                          daily climate summary for the search area (default true).
         limit: Max records per source (default 20).
+        offset: Number of results to skip for pagination (default 0).
+        output_format: "json" (default) returns structured dict with sections.
+                       "geojson" returns species_occurrences as a GeoJSON
+                       FeatureCollection (useful for QGIS and mapping tools).
 
-    Returns species occurrences (OBIS), nearby monitoring sites (NEON),
-    and climate context (ERA5) in a single response.
+    Example return (json): {"species_occurrences": [...], "neon_sites": [...],
+    "climate": {"daily": [...]}, "search_context": {"relevance_scores": [...]}}
     """
-    return await run_search(
+    result = await run_search(
         scientificname=scientificname, lat=lat, lon=lon,
         radius_km=radius_km, start_date=start_date, end_date=end_date,
         include_climate=include_climate, limit=limit,
         obis=_obis, neon=_neon, era5=_era5,
         inat=_inat, ebird=_ebird,
     )
+
+    if output_format == "geojson":
+        from kinship_shared import observations_to_geojson
+        occurrences = result.get("species_occurrences", [])
+        result["species_occurrences_geojson"] = observations_to_geojson(occurrences)
+
+    return result
 
 
 @mcp.tool()

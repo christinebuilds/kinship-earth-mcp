@@ -9,6 +9,7 @@ Get a free key at: https://ebird.org/api/keygen
 """
 
 import os
+from typing import Literal
 
 from mcp.server.fastmcp import FastMCP
 
@@ -35,7 +36,7 @@ def _obs_to_dict(obs) -> dict:
         "scientific_name": obs.taxon.scientific_name if obs.taxon else None,
         "common_name": obs.taxon.common_name if obs.taxon else None,
         "lat": obs.location.lat,
-        "lng": obs.location.lng,
+        "lon": obs.location.lng,
         "location_name": obs.location.site_name,
         "observed_at": obs.observed_at.isoformat(),
         "count": obs.value.get("count") if obs.value else None,
@@ -47,33 +48,48 @@ def _obs_to_dict(obs) -> dict:
 @mcp.tool()
 async def ebird_recent_observations(
     lat: float,
-    lng: float,
+    lon: float,
     radius_km: float = 25,
     species: str | None = None,
     days_back: int = 14,
     limit: int = 20,
-) -> list[dict]:
+    offset: int = 0,
+    output_format: Literal["json", "geojson"] = "json",
+) -> list[dict] | dict:
     """
     Search for recent bird observations near a location.
 
+    Use this for real-time bird data (last 1-30 days). For historical bird
+    records, use ecology_search on the orchestrator instead.
+
     Args:
         lat: Latitude in decimal degrees
-        lng: Longitude in decimal degrees (negative = West)
+        lon: Longitude in decimal degrees (negative = West)
         radius_km: Search radius in km (max 50)
         species: Scientific name to filter by (optional)
         days_back: How many days back to search (1-30, default 14)
         limit: Max results to return (default 20)
+        offset: Number of results to skip for pagination (default 0)
+        output_format: "json" (default) returns a list of dicts.
+                       "geojson" returns a GeoJSON FeatureCollection for
+                       mapping tools (QGIS, Jupyter, etc).
 
-    Returns a list of bird observations with species, location, date, and count.
+    Example return (json): [{"id": "ebird:OBS123", "scientific_name": "Turdus migratorius",
+    "common_name": "American Robin", "lat": 37.77, "lon": -122.42, "observed_at": "2026-03-15T08:30:00", "count": 3}]
     """
-    from kinship_shared import SearchParams
+    from kinship_shared import SearchParams, observations_to_geojson
 
     params = SearchParams(
         lat=lat,
-        lng=lng,
+        lon=lon,
         radius_km=radius_km,
         taxon=species,
         limit=limit,
+        offset=offset,
     )
     results = await _adapter.search(params)
-    return [_obs_to_dict(obs) for obs in results]
+    observations = [_obs_to_dict(obs) for obs in results]
+
+    if output_format == "geojson":
+        return observations_to_geojson(observations)
+    return observations
