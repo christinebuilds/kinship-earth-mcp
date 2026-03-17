@@ -1,8 +1,8 @@
 [project]
-name = "soilgrids-mcp"
+name = "gbif-mcp"
 version = "0.1.0"
 requires-python = ">=3.12"
-description = "MCP server for ISRIC SoilGrids global soil data at 250m resolution"
+description = "MCP server for the GBIF API (Global Biodiversity Information Facility)"
 license = { text = "MIT" }
 dependencies = [
     "mcp[cli]>=1.0",
@@ -14,7 +14,7 @@ dependencies = [
 kinship-shared = { workspace = true }
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/soilgrids_mcp"]
+packages = ["src/gbif_mcp"]
 
 [build-system]
 requires = ["hatchling"]

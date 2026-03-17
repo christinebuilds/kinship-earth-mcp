@@ -33,7 +33,7 @@ No single API gives you this. Kinship Earth combines **NEON** (81 US ecological 
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/christineyws-beep/kinship-earth-mcp.git
+git clone https://github.com/christinebuilds/kinship-earth-mcp.git
 cd kinship-earth-mcp
 uv sync
 ```

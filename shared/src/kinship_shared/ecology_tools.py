@@ -316,13 +316,19 @@ async def run_search(
     }
 
 
-async def run_describe_sources(*, neon, obis, era5, inat=None, ebird=None) -> dict:
+async def run_describe_sources(*, neon, obis, era5, inat=None, ebird=None, gbif=None, nwis=None, xc=None, **kwargs) -> dict:
     """Describe all available ecological data sources and their capabilities."""
     sources = [neon, obis, era5]
     if inat:
         sources.append(inat)
     if ebird and getattr(ebird, '_api_key', None):
         sources.append(ebird)
+    if gbif:
+        sources.append(gbif)
+    if nwis:
+        sources.append(nwis)
+    if xc and getattr(xc, '_api_key', None):
+        sources.append(xc)
     descriptions = []
 
     for adapter in sources:

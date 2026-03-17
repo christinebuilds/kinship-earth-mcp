@@ -29,6 +29,9 @@ from obis_mcp.adapter import OBISAdapter
 from era5_mcp.adapter import ERA5Adapter
 from inaturalist_mcp.adapter import INaturalistAdapter
 from ebird_mcp.adapter import EBirdAdapter
+from gbif_mcp.adapter import GBIFAdapter
+from usgs_nwis_mcp.adapter import USGSNWISAdapter
+from xenocanto_mcp.adapter import XenoCantoAdapter
 
 from kinship_shared import (
     run_describe_sources,
@@ -60,6 +63,9 @@ _obis = OBISAdapter()
 _era5 = ERA5Adapter()
 _inat = INaturalistAdapter()
 _ebird = EBirdAdapter(api_key=os.environ.get("EBIRD_API_KEY"))
+_gbif = GBIFAdapter()
+_nwis = USGSNWISAdapter()
+_xc = XenoCantoAdapter(api_key=os.environ.get("XC_API_KEY"))
 
 
 # ---------------------------------------------------------------------------
@@ -172,7 +178,11 @@ async def ecology_describe_sources() -> dict:
     requirements. Use this to understand what data is available before
     searching.
     """
-    return await run_describe_sources(neon=_neon, obis=_obis, era5=_era5, inat=_inat, ebird=_ebird)
+    return await run_describe_sources(
+        neon=_neon, obis=_obis, era5=_era5,
+        inat=_inat, ebird=_ebird,
+        gbif=_gbif, nwis=_nwis, xc=_xc,
+    )
 
 
 # DRAFT: citizen-facing discovery tool (pending full eBird + iNaturalist validation)

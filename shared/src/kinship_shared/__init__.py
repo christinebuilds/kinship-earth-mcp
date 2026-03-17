@@ -11,7 +11,10 @@ from .ranking import rank_observations, score_observation
 from .retry import http_get_with_retry
 from .schema import (
     AdapterCapabilities,
+    EcologicalAnomaly,
+    EcologicalEvent,
     EcologicalObservation,
+    EcosystemState,
     Location,
     Provenance,
     Quality,
@@ -39,4 +42,7 @@ __all__ = [
     "run_get_environmental_context",
     "run_search",
     "observations_to_geojson",
+    "EcologicalAnomaly",
+    "EcologicalEvent",
+    "EcosystemState",
 ]

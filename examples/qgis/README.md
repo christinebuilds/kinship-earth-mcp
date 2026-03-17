@@ -17,7 +17,7 @@ Kinship Earth MCP provides ecological data (species observations, climate, monit
 2. **QGIS MCP Server** — [github.com/jjsantos01/qgis_mcp](https://github.com/jjsantos01/qgis_mcp)
    - Install the QGIS plugin (socket server component)
    - Install the MCP server (Python component)
-3. **Kinship Earth MCP Server** — [github.com/christineyws-beep/kinship-earth-mcp](https://github.com/christineyws-beep/kinship-earth-mcp)
+3. **Kinship Earth MCP Server** — [github.com/christinebuilds/kinship-earth-mcp](https://github.com/christinebuilds/kinship-earth-mcp)
 4. **An MCP-capable AI client** — Claude Desktop, Cursor, or any client that supports multiple MCP servers
 
 ### API Keys (Optional)

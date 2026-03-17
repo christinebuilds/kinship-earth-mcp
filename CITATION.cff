@@ -1,21 +1,29 @@
 cff-version: 1.2.0
-message: "If you use this software, please cite it as below."
+title: "Kinship Earth: Ecological Intelligence Middleware"
+message: "If you use Kinship Earth in your research, please cite it using this metadata."
 type: software
-title: "Kinship Earth MCP"
-abstract: >
-  Ecological intelligence middleware — a unified MCP/REST API connecting
-  fragmented ecological data sources (NEON, OBIS, ERA5, Xeno-canto, eBird, GBIF)
-  into a single queryable interface for AI agents and researchers.
-version: 0.1.0
-date-released: "2026-03-02"
-license: MIT
-repository-code: "https://github.com/yourusername/kinship-earth-mcp"
+authors:
+  - given-names: Christine
+    family-names: Su
+repository-code: "https://github.com/christinebuilds/kinship-earth-mcp"
+url: "https://web-production-23e575.up.railway.app"
 keywords:
   - ecology
   - biodiversity
-  - MCP
+  - ecological-data
+  - mcp
   - model-context-protocol
-  - ecological-informatics
-  - NEON
-  - GBIF
+  - darwin-core
+  - environmental-monitoring
+  - citizen-science
   - FAIR-data
+license: MIT
+version: 0.2.0
+date-released: "2026-03-15"
+abstract: >-
+  Kinship Earth is an open-source middleware layer that connects fragmented
+  ecological databases (NEON, OBIS, ERA5, GBIF, iNaturalist, eBird, USGS NWIS,
+  Xeno-canto, SoilGrids) into a single queryable interface. It normalizes data
+  from multiple sources into a unified Darwin Core-aligned schema with provenance,
+  quality tiers, and relevance scoring. Available as MCP servers (for AI agents)
+  and a REST API (for scientists).

@@ -378,3 +378,148 @@ class AdapterCapabilities(BaseModel):
     rate_limit_per_minute: Optional[int] = None
     license: Optional[str] = None
     homepage_url: Optional[str] = None
+
+
+# ---------------------------------------------------------------------------
+# Phase 2: Streaming event types
+# ---------------------------------------------------------------------------
+
+AnomalyType = Literal[
+    "temperature",     # thermal anomaly
+    "flow",            # hydrological flow deviation
+    "phenological",    # timing shift (early/late events)
+    "acoustic",        # soundscape change
+    "spectral",        # vegetation stress (NDVI, EVI)
+    "composition",     # species composition shift
+    "chemical",        # water/air chemistry deviation
+]
+
+
+class EcologicalAnomaly(BaseModel):
+    """A deviation from baseline in an ecological signal.
+
+    Phase 2 type — used by monitoring agents to flag changes.
+    """
+
+    id: str = Field(description="Unique anomaly ID, e.g. 'anomaly:russian-river:2026-03-15:flow'")
+    anomaly_type: AnomalyType
+    location: Location
+    detected_at: datetime
+    signal_value: float = Field(description="Current observed value")
+    baseline_value: float = Field(description="Expected value (30-year normal or seasonal baseline)")
+    deviation_pct: float = Field(description="Percentage deviation from baseline")
+    severity: Literal["info", "warning", "critical"] = "info"
+    description: str = Field(description="Human-readable description of the anomaly")
+    sources: list[str] = Field(
+        default_factory=list,
+        description="Source adapter IDs that contributed to this detection",
+    )
+    observations: list[str] = Field(
+        default_factory=list,
+        description="Related EcologicalObservation IDs",
+    )
+    confidence: float = Field(ge=0, le=1, description="Detection confidence 0-1")
+
+
+EcologicalEventType = Literal[
+    "drought_cascade",       # multi-signal drought pattern
+    "phenological_shift",    # timing mismatch between species/seasons
+    "range_expansion",       # species appearing in new areas
+    "die_off",               # mass mortality event
+    "bloom",                 # algal bloom, insect emergence
+    "migration",             # seasonal movement pattern
+    "tipping_point_warning", # approaching irreversible change
+]
+
+
+class EcologicalEvent(BaseModel):
+    """A classified ecological event synthesized from multiple anomalies.
+
+    Phase 2-3 type — higher-level interpretation of raw signals.
+    """
+
+    id: str = Field(description="Unique event ID")
+    event_type: EcologicalEventType
+    location: Location
+    detected_at: datetime
+    duration_days: Optional[int] = None
+    severity: Literal["info", "warning", "critical", "emergency"] = "info"
+    title: str = Field(description="Short event title, e.g. 'Drought cascade in Klamath Basin'")
+    narrative: str = Field(description="Multi-sentence, data-grounded description of the event")
+    anomalies: list[str] = Field(
+        default_factory=list,
+        description="Related EcologicalAnomaly IDs",
+    )
+    sources: list[str] = Field(
+        default_factory=list,
+        description="All source adapter IDs that contributed",
+    )
+    confidence: float = Field(ge=0, le=1)
+    historical_analog: Optional[str] = Field(
+        default=None,
+        description="Reference to a similar past event, e.g. '2021 Klamath drought cascade'",
+    )
+
+
+# ---------------------------------------------------------------------------
+# Phase 3-5: Ecosystem state (continuous monitoring)
+# ---------------------------------------------------------------------------
+
+class EcosystemState(BaseModel):
+    """Real-time ecological state vector for a monitored location.
+
+    Phase 3+ type — the foundation for emergent intelligence. When
+    maintained continuously for many ecosystems, cross-location pattern
+    detection becomes possible.
+    """
+
+    id: str = Field(description="Ecosystem identifier, e.g. 'watershed:russian-river'")
+    location: Location
+    timestamp: datetime
+    period_days: int = Field(default=30, description="Lookback window for computed metrics")
+
+    # Hydrological signals
+    streamflow_cfs: Optional[float] = Field(default=None, description="Current streamflow (cubic feet/sec)")
+    streamflow_baseline: Optional[float] = Field(default=None, description="30-year normal for this date")
+    soil_moisture_pct: Optional[float] = Field(default=None, description="Volumetric water content")
+    precipitation_7d_mm: Optional[float] = Field(default=None, description="7-day precipitation total")
+
+    # Biological signals
+    species_richness: Optional[int] = Field(default=None, description="Species count in lookback window")
+    species_baseline: Optional[int] = Field(default=None, description="Expected species count for this date")
+    acoustic_diversity_index: Optional[float] = Field(default=None, description="Acoustic complexity index")
+
+    # Spectral signals
+    ndvi: Optional[float] = Field(default=None, description="Normalized Difference Vegetation Index")
+    ndvi_baseline: Optional[float] = Field(default=None, description="Seasonal NDVI baseline")
+
+    # Climate signals
+    temp_mean_c: Optional[float] = Field(default=None, description="Mean temperature over period")
+    temp_anomaly_c: Optional[float] = Field(default=None, description="Deviation from 30-year normal")
+
+    # Derived metrics
+    deviation_vector: list[float] = Field(
+        default_factory=list,
+        description="Normalized deviation from baseline for each signal (-1 to 1)",
+    )
+    overall_health_score: Optional[float] = Field(
+        default=None,
+        ge=0, le=100,
+        description="Composite ecosystem health score (0-100)",
+    )
+    trend_direction: Optional[Literal["improving", "stable", "declining", "critical"]] = None
+    active_anomalies: list[str] = Field(
+        default_factory=list,
+        description="IDs of currently active EcologicalAnomaly objects",
+    )
+    active_events: list[str] = Field(
+        default_factory=list,
+        description="IDs of currently active EcologicalEvent objects",
+    )
+
+    # Data provenance
+    sources_contributing: list[str] = Field(
+        default_factory=list,
+        description="Adapter IDs currently feeding this state vector",
+    )
+    last_updated: Optional[datetime] = None

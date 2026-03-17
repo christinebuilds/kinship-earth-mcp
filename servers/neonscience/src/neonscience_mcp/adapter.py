@@ -199,7 +199,7 @@ def _site_to_observation(site: dict) -> Optional[EcologicalObservation]:
         provenance=Provenance(
             source_api="neonscience",
             source_id=site_code,
-            original_url=f"{NEON_PORTAL_BASE}/field-sites/{site_code}",
+            original_url=f"https://www.neonscience.org/field-sites/{site_code.lower()}",
             license="CC-BY-4.0",
             attribution="National Ecological Observatory Network (NEON)",
             citation_string=(

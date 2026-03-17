@@ -15,7 +15,7 @@ Thanks for testing! You'll be using Claude Desktop to query ecological data thro
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/christineyws-beep/kinship-earth-mcp.git
+git clone https://github.com/christinebuilds/kinship-earth-mcp.git
 cd kinship-earth-mcp
 ./setup-claude-desktop.sh
 ```
