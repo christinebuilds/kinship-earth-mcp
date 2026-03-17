@@ -6,6 +6,7 @@ requires-python = ">=3.12"
 members = [
     "ebird-mcp",
     "era5-mcp",
+    "gbif-mcp",
     "inaturalist-mcp",
     "kinship-earth",
     "kinship-earth-launcher",
@@ -13,7 +14,9 @@ members = [
     "kinship-shared",
     "neonscience-mcp",
     "obis-mcp",
+    "soilgrids-mcp",
     "usgs-nwis-mcp",
+    "xenocanto-mcp",
 ]
 
 [[package]]
@@ -231,6 +234,23 @@ requires-dist = [
 ]
 
 [[package]]
+name = "gbif-mcp"
+version = "0.1.0"
+source = { editable = "servers/gbif" }
+dependencies = [
+    { name = "httpx" },
+    { name = "kinship-shared" },
+    { name = "mcp", extra = ["cli"] },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "httpx", specifier = ">=0.27" },
+    { name = "kinship-shared", editable = "shared" },
+    { name = "mcp", extras = ["cli"], specifier = ">=1.0" },
+]
+
+[[package]]
 name = "h11"
 version = "0.16.0"
 source = { registry = "https://pypi.org/simple" }
@@ -383,26 +403,32 @@ source = { editable = "servers/orchestrator" }
 dependencies = [
     { name = "ebird-mcp" },
     { name = "era5-mcp" },
+    { name = "gbif-mcp" },
     { name = "httpx" },
     { name = "inaturalist-mcp" },
     { name = "kinship-shared" },
     { name = "mcp", extra = ["cli"] },
     { name = "neonscience-mcp" },
     { name = "obis-mcp" },
+    { name = "soilgrids-mcp" },
     { name = "usgs-nwis-mcp" },
+    { name = "xenocanto-mcp" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "ebird-mcp", editable = "servers/ebird" },
     { name = "era5-mcp", editable = "servers/era5" },
+    { name = "gbif-mcp", editable = "servers/gbif" },
     { name = "httpx", specifier = ">=0.27" },
     { name = "inaturalist-mcp", editable = "servers/inaturalist" },
     { name = "kinship-shared", editable = "shared" },
     { name = "mcp", extras = ["cli"], specifier = ">=1.0" },
     { name = "neonscience-mcp", editable = "servers/neonscience" },
     { name = "obis-mcp", editable = "servers/obis" },
+    { name = "soilgrids-mcp", editable = "servers/soilgrids" },
     { name = "usgs-nwis-mcp", editable = "servers/usgs-nwis" },
+    { name = "xenocanto-mcp", editable = "servers/xeno-canto" },
 ]
 
 [[package]]
@@ -833,6 +859,23 @@ wheels = [
 ]
 
 [[package]]
+name = "soilgrids-mcp"
+version = "0.1.0"
+source = { editable = "servers/soilgrids" }
+dependencies = [
+    { name = "httpx" },
+    { name = "kinship-shared" },
+    { name = "mcp", extra = ["cli"] },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "httpx", specifier = ">=0.27" },
+    { name = "kinship-shared", editable = "shared" },
+    { name = "mcp", extras = ["cli"], specifier = ">=1.0" },
+]
+
+[[package]]
 name = "sse-starlette"
 version = "3.3.2"
 source = { registry = "https://pypi.org/simple" }
@@ -922,4 +965,21 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/32/ce/eeb58ae4ac36fe09e3842eb02e0eb676bf2c53ae062b98f1b2531673efdd/uvicorn-0.41.0.tar.gz", hash = "sha256:09d11cf7008da33113824ee5a1c6422d89fbc2ff476540d69a34c87fab8b571a", size = 82633, upload-time = "2026-02-16T23:07:24.1Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/83/e4/d04a086285c20886c0daad0e026f250869201013d18f81d9ff5eada73a88/uvicorn-0.41.0-py3-none-any.whl", hash = "sha256:29e35b1d2c36a04b9e180d4007ede3bcb32a85fbdfd6c6aeb3f26839de088187", size = 68783, upload-time = "2026-02-16T23:07:22.357Z" },
+]
+
+[[package]]
+name = "xenocanto-mcp"
+version = "0.1.0"
+source = { editable = "servers/xeno-canto" }
+dependencies = [
+    { name = "httpx" },
+    { name = "kinship-shared" },
+    { name = "mcp", extra = ["cli"] },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "httpx", specifier = ">=0.27" },
+    { name = "kinship-shared", editable = "shared" },
+    { name = "mcp", extras = ["cli"], specifier = ">=1.0" },
 ]
