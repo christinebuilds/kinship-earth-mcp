@@ -93,20 +93,24 @@ ADAPTERS: dict[str, dict[str, Any]] = {
         "single_record": True,
     },
     "usgs_nwis": {
-        "url": "https://api.waterdata.usgs.gov/ogcapi/v0/collections/monitoring-locations/items",
+        "url": "https://waterservices.usgs.gov/nwis/iv/",
         "params": {
-            "monitoring_location_id": "USGS-11143000",
-            "limit": 1,
-            "f": "json",
+            "format": "json",
+            "sites": "11143000",
+            "parameterCd": "00060",
+            "siteStatus": "active",
         },
-        "path": "features",
-        "note": "USGS monitoring location 11143000 (Big Sur River)",
+        "path": "value.timeSeries",
+        "note": "USGS site 11143000 (Big Sur River) — instantaneous streamflow",
     },
     "xeno_canto": {
         "url": "https://xeno-canto.org/api/3/recordings",
         "params": {"query": "Turdus migratorius", "page": 1},
         "path": "recordings",
-        "note": "American Robin recordings (page 1)",
+        "note": "American Robin recordings (API v3, requires XC_API_KEY)",
+        "auth_env": "XC_API_KEY",
+        "auth_header": "Authorization",
+        "auth_prefix": "Bearer ",
     },
     "soilgrids": {
         "url": "https://rest.isric.org/soilgrids/v2.0/properties/query",
@@ -251,7 +255,8 @@ def _fetch_adapter(name: str, config: dict[str, Any], timeout: float = 30) -> di
                 f"Skipping {name}: env var {auth_env} not set"
             )
         auth_header = config.get("auth_header", "Authorization")
-        headers[auth_header] = key
+        auth_prefix = config.get("auth_prefix", "")
+        headers[auth_header] = f"{auth_prefix}{key}"
 
     with httpx.Client(timeout=timeout, follow_redirects=True) as client:
         resp = client.get(config["url"], params=config.get("params", {}), headers=headers)
