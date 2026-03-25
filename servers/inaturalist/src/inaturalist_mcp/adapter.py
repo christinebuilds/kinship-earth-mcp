@@ -93,6 +93,10 @@ class INaturalistAdapter(EcologicalAdapter):
         if params.taxon:
             api_params["taxon_name"] = params.taxon
 
+        # Iconic taxon group filter (Aves, Mammalia, Insecta, Plantae, etc.)
+        if getattr(params, 'iconic_taxon', None):
+            api_params["iconic_taxon_name"] = params.iconic_taxon
+
         # Date range filter
         if params.start_date:
             api_params["d1"] = params.start_date

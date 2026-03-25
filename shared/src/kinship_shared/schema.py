@@ -306,6 +306,7 @@ class SearchParams(BaseModel):
             self.lon = self.lng
     taxon: Optional[str] = Field(default=None, description="Scientific or common name.")
     taxon_id: Optional[int] = Field(default=None, description="GBIF taxon key.")
+    iconic_taxon: Optional[str] = Field(default=None, description="Broad taxonomic group filter: Aves, Mammalia, Reptilia, Amphibia, Actinopterygii, Mollusca, Arachnida, Insecta, Plantae, Fungi.")
     site_id: Optional[str] = Field(default=None, description="Named site code, e.g. 'WREF'.")
     start_date: Optional[str] = Field(default=None, description="ISO 8601 date string.")
     end_date: Optional[str] = Field(default=None, description="ISO 8601 date string.")
