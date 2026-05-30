@@ -66,7 +66,7 @@ class XenoCantoAdapter:
             temporal_coverage_start="2005",
             update_frequency="daily",
             quality_tier=2,
-            requires_auth=False,
+            requires_auth=True,  # Xeno-canto API v3 requires an API key (XC_API_KEY)
             license="CC (varies per recording — CC-BY, CC-BY-NC, CC-BY-SA, etc.)",
             homepage_url="https://xeno-canto.org",
             supports_location_search=True,

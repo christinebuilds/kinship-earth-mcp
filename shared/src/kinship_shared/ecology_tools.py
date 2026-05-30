@@ -322,25 +322,27 @@ async def run_search(
 
 
 async def run_describe_sources(*, neon, obis, era5, inat=None, ebird=None, gbif=None, nwis=None, xc=None, soilgrids=None, **kwargs) -> dict:
-    """Describe all available ecological data sources and their capabilities."""
-    sources = [neon, obis, era5]
-    if inat:
-        sources.append(inat)
-    if ebird and getattr(ebird, '_api_key', None):
-        sources.append(ebird)
-    if gbif:
-        sources.append(gbif)
-    if nwis:
-        sources.append(nwis)
-    if xc and getattr(xc, '_api_key', None):
-        sources.append(xc)
-    if soilgrids:
-        sources.append(soilgrids)
+    """Describe all available ecological data sources and their capabilities.
+
+    All registered sources are always listed. Sources that require an API key
+    report ``available: false`` when no key is configured (so the caller knows
+    the source exists and what would unlock it), rather than being silently
+    hidden.
+    """
+    # All registered sources, in federation order. None entries are skipped so
+    # callers that wire up a subset still work.
+    sources = [s for s in (neon, obis, era5, inat, ebird, gbif, nwis, xc, soilgrids) if s]
     descriptions = []
 
     for adapter in sources:
         caps = adapter.capabilities()
-        descriptions.append({
+        # A source is unavailable only when it requires auth and no key is set.
+        # Adapters store their credential as _api_key (or _api_token for NEON).
+        has_key = bool(
+            getattr(adapter, "_api_key", None) or getattr(adapter, "_api_token", None)
+        )
+        available = (not caps.requires_auth) or has_key
+        entry = {
             "id": caps.adapter_id,
             "name": caps.name,
             "description": caps.description,
@@ -350,6 +352,7 @@ async def run_describe_sources(*, neon, obis, era5, inat=None, ebird=None, gbif=
             "update_frequency": caps.update_frequency,
             "quality_tier": caps.quality_tier,
             "requires_auth": caps.requires_auth,
+            "available": available,
             "license": caps.license,
             "homepage": caps.homepage_url,
             "search_capabilities": {
@@ -358,10 +361,18 @@ async def run_describe_sources(*, neon, obis, era5, inat=None, ebird=None, gbif=
                 "date_range": caps.supports_date_range,
                 "site_code": caps.supports_site_search,
             },
-        })
+        }
+        if not available:
+            entry["unavailable_reason"] = (
+                "Requires an API key — set the appropriate environment variable "
+                "to enable this source."
+            )
+        descriptions.append(entry)
 
+    available_count = sum(1 for d in descriptions if d["available"])
     return {
         "source_count": len(descriptions),
+        "available_count": available_count,
         "sources": descriptions,
         "cross_source_tools": [
             {
