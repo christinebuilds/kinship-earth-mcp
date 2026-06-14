@@ -29,7 +29,7 @@
 | 10 | `010-memory-ranking.md` | done | 2026-04-16 | 2026-04-15 | Phase 4.3 + integration |
 | 11 | `011-ecosystem-state.md` | done | 2026-05-12 | 2026-05-11 | Phase 5.1 |
 | 12 | `012-anomaly-detection.md` | done | 2026-05-13 | 2026-05-11 | Phase 5.2 |
-| 13 | `013-event-synthesis.md` | ready | 2026-05-14 | | Phase 5.3 |
+| 13 | `013-event-synthesis.md` | done | 2026-05-14 | 2026-06-14 | Phase 5.3 |
 | 14 | `014-new-data-sources.md` | ready | 2026-05-15 | | Phase 5.4 |
 
 ### Status Key
@@ -41,9 +41,9 @@
 
 ## Inventory
 
-- **Specs ready:** 2
+- **Specs ready:** 1
 - **Specs queued (need writing):** 0
-- **Specs done:** 12
-- **Buffer:** 3 specs ready, 11 done
+- **Specs done:** 13
+- **Buffer:** 1 spec ready — WRITE MORE SPECS next interactive session
 
 > When buffer drops to 2 or fewer, the next interactive session should prioritize writing more specs.

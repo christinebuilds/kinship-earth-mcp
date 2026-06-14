@@ -28,7 +28,9 @@ from .graph_store import EcologicalGraph
 from .anomaly_detect import run_anomaly_detection
 from .anomaly_graph import anomaly_to_graph_entities
 from .baselines import BaselineValues, compute_deviation, compute_health_score, classify_trend
-from .monitoring import MonitoringRegistry, MonitoringSite
+from .monitoring import MonitoringRegistry, MonitoringSite, Subscription
+from .event_classify import EventPattern, synthesize_events
+from .analog_match import HistoricalAnalog, attach_analog_to_event, find_historical_analogs
 from .state_builder import build_ecosystem_state
 from .summarize import make_human_summary, summarize_search_result
 from .viz import make_climate_chart_hint, make_map_hint, make_visualization_hint

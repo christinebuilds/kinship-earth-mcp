@@ -670,6 +670,153 @@ async def ecology_check_anomalies(
 
 
 @mcp.tool()
+async def ecology_events(
+    lat: float,
+    lng: float,
+    include_analogs: bool = True,
+    severity_min: Literal["info", "warning", "critical"] = "info",
+) -> dict:
+    """
+    Synthesize ecological events from detected anomalies at a location.
+
+    Runs the full pipeline: ecosystem state → anomaly detection → event
+    synthesis → historical analog matching. Returns classified events like
+    'drought cascade', 'die-off', 'phenological shift' with data-grounded
+    narratives and historical context.
+
+    This is the highest-level ecological intelligence tool — it interprets
+    raw signals into ecological stories.
+
+    Args:
+        lat: Latitude in decimal degrees.
+        lng: Longitude in decimal degrees.
+        include_analogs: Whether to search for historical analogs (default True).
+        severity_min: Minimum event severity to return ('info', 'warning', 'critical').
+    """
+    from kinship_shared.schema import Location
+    from kinship_shared.event_classify import synthesize_events
+    from kinship_shared.analog_match import find_historical_analogs, attach_analog_to_event
+
+    location = Location(lat=lat, lng=lng)
+    site_id = f"location:{lat:.2f}_{lng:.2f}"
+
+    state = await build_ecosystem_state(
+        site_id=site_id, location=location,
+        era5_adapter=_era5, usgs_adapter=_nwis,
+        ebird_adapter=_ebird if getattr(_ebird, '_api_key', None) else None,
+        gbif_adapter=_gbif,
+    )
+
+    from datetime import datetime as dt, timezone as tz
+    now = dt.now(tz.utc)
+    baseline = await compute_baselines_from_era5(_era5, lat, lng, now)
+
+    anomalies = run_anomaly_detection(
+        location=location, baseline=baseline, state=state,
+    )
+
+    severity_order = {"info": 0, "warning": 1, "critical": 2}
+    min_level = severity_order.get(severity_min, 0)
+    filtered_anomalies = [a for a in anomalies if severity_order.get(a.severity, 0) >= min_level]
+
+    events = synthesize_events(filtered_anomalies, location=location)
+
+    all_analogs: list[dict] = []
+    if include_analogs:
+        for event in events:
+            analogs = find_historical_analogs(event)
+            attach_analog_to_event(event, analogs)
+            all_analogs.extend([a.model_dump(mode="json") for a in analogs])
+
+    result = {
+        "location": {"lat": lat, "lng": lng},
+        "event_count": len(events),
+        "events": [e.model_dump(mode="json") for e in events],
+        "anomaly_count": len(filtered_anomalies),
+        "historical_analogs": all_analogs,
+        "visualization_hint": "timeline",
+    }
+
+    asyncio.create_task(_store_turn("ecology_events", {"lat": lat, "lng": lng}, result))
+    return result
+
+
+@mcp.tool()
+async def ecology_subscribe(
+    action: Literal["subscribe", "unsubscribe", "list"],
+    lat: Optional[float] = None,
+    lng: Optional[float] = None,
+    site_name: Optional[str] = None,
+    severity_min: str = "warning",
+) -> dict:
+    """
+    Subscribe to ecological alerts for a location.
+
+    - subscribe: Register for alerts when anomalies/events are detected
+    - unsubscribe: Stop receiving alerts for a location
+    - list: Show all active subscriptions
+
+    Subscriptions are stored in the monitoring registry. When the
+    ecology_check_anomalies or ecology_events tools detect signals above
+    the severity threshold, subscribed locations are flagged.
+
+    Args:
+        action: One of 'subscribe', 'unsubscribe', 'list'.
+        lat: Latitude (required for subscribe/unsubscribe).
+        lng: Longitude (required for subscribe/unsubscribe).
+        site_name: Optional human-readable name for the location.
+        severity_min: Minimum severity to alert on ('warning' default).
+    """
+    from kinship_shared.monitoring import Subscription
+    from kinship_shared.schema import Location
+
+    await _ensure_monitoring()
+
+    if action == "list":
+        subs = await _monitoring.list_subscriptions()
+        pending = await _monitoring.get_pending_alerts()
+        return {
+            "action": "list",
+            "subscriptions": [s.model_dump(mode="json") for s in subs],
+            "pending_alerts": pending,
+            "count": len(subs),
+        }
+
+    if lat is None or lng is None:
+        return {"error": "lat and lng are required for subscribe/unsubscribe"}
+
+    site_id = f"location:{lat:.2f}_{lng:.2f}"
+
+    if action == "subscribe":
+        site = MonitoringSite(
+            site_id=site_id,
+            name=site_name or f"{lat:.2f}, {lng:.2f}",
+            location=Location(lat=lat, lng=lng),
+        )
+        await _monitoring.add_site(site)
+        sub = Subscription(site_id=site_id, severity_min=severity_min)
+        await _monitoring.add_subscription(sub)
+        return {
+            "action": "subscribe",
+            "site_id": site_id,
+            "site_name": site.name,
+            "severity_min": severity_min,
+            "message": f"Subscribed to alerts for {site.name} (severity >= {severity_min})",
+        }
+
+    if action == "unsubscribe":
+        removed = await _monitoring.remove_subscription(site_id, "anonymous")
+        return {
+            "action": "unsubscribe",
+            "site_id": site_id,
+            "removed": removed,
+            "message": f"Unsubscribed from alerts for {site_id}" if removed else f"No subscription found for {site_id}",
+        }
+
+    return {"error": f"Unknown action: {action}"}
+
+
+@mcp.tool()
 async def ecology_memory_recall(
     lat: Optional[float] = None,
     lon: Optional[float] = None,

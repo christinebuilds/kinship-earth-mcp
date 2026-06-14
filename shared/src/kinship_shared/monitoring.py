@@ -42,9 +42,28 @@ CREATE TABLE IF NOT EXISTS ecosystem_states (
     PRIMARY KEY (site_id, timestamp)
 );
 
+CREATE TABLE IF NOT EXISTS subscriptions (
+    site_id TEXT NOT NULL,
+    user_id TEXT NOT NULL DEFAULT 'anonymous',
+    severity_min TEXT NOT NULL DEFAULT 'warning',
+    created_at TEXT NOT NULL,
+    last_notified TEXT,
+    PRIMARY KEY (site_id, user_id)
+);
+
 CREATE INDEX IF NOT EXISTS idx_states_site ON ecosystem_states(site_id);
 CREATE INDEX IF NOT EXISTS idx_states_time ON ecosystem_states(timestamp);
 """
+
+
+class Subscription(BaseModel):
+    """An alert subscription for a monitored location."""
+
+    site_id: str
+    user_id: str = Field(default="anonymous")
+    severity_min: str = Field(default="warning")
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    last_notified: Optional[datetime] = None
 
 
 class MonitoringSite(BaseModel):
@@ -136,6 +155,60 @@ class MonitoringRegistry:
             cursor = await db.execute("DELETE FROM monitoring_sites WHERE site_id = ?", (site_id,))
             await db.commit()
             return cursor.rowcount > 0
+
+    async def add_subscription(self, sub: Subscription) -> None:
+        await self.initialize()
+        async with aiosqlite.connect(self._db_path) as db:
+            await db.execute(
+                "INSERT OR REPLACE INTO subscriptions (site_id, user_id, severity_min, created_at, last_notified) VALUES (?, ?, ?, ?, ?)",
+                (sub.site_id, sub.user_id, sub.severity_min, sub.created_at.isoformat(), sub.last_notified.isoformat() if sub.last_notified else None),
+            )
+            await db.commit()
+
+    async def remove_subscription(self, site_id: str, user_id: str) -> bool:
+        await self.initialize()
+        async with aiosqlite.connect(self._db_path) as db:
+            cursor = await db.execute(
+                "DELETE FROM subscriptions WHERE site_id = ? AND user_id = ?",
+                (site_id, user_id),
+            )
+            await db.commit()
+            return cursor.rowcount > 0
+
+    async def list_subscriptions(self, user_id: str = "anonymous") -> list[Subscription]:
+        await self.initialize()
+        async with aiosqlite.connect(self._db_path) as db:
+            cursor = await db.execute(
+                "SELECT site_id, user_id, severity_min, created_at, last_notified FROM subscriptions WHERE user_id = ?",
+                (user_id,),
+            )
+            rows = await cursor.fetchall()
+            return [
+                Subscription(
+                    site_id=row[0],
+                    user_id=row[1],
+                    severity_min=row[2],
+                    created_at=datetime.fromisoformat(row[3]),
+                    last_notified=datetime.fromisoformat(row[4]) if row[4] else None,
+                )
+                for row in rows
+            ]
+
+    async def get_pending_alerts(self, user_id: str = "anonymous") -> list[dict]:
+        await self.initialize()
+        subs = await self.list_subscriptions(user_id)
+        alerts = []
+        for sub in subs:
+            state = await self.get_latest_state(sub.site_id)
+            if state:
+                alerts.append({
+                    "site_id": sub.site_id,
+                    "severity_min": sub.severity_min,
+                    "last_notified": sub.last_notified.isoformat() if sub.last_notified else None,
+                    "latest_state_timestamp": state.timestamp.isoformat(),
+                    "health_score": state.overall_health_score,
+                })
+        return alerts
 
     async def store_state(self, state: EcosystemState) -> None:
         await self.initialize()
