@@ -35,6 +35,8 @@ from gbif_mcp.adapter import GBIFAdapter
 from usgs_nwis_mcp.adapter import USGSNWISAdapter
 from xenocanto_mcp.adapter import XenoCantoAdapter
 from soilgrids_mcp.adapter import SoilGridsAdapter
+from movebank_mcp.adapter import MovebankAdapter
+from fluxnet_mcp.adapter import FLUXNETAdapter
 
 from .auth_sqlite import SQLiteAuthManager
 
@@ -77,6 +79,8 @@ _gbif = GBIFAdapter()
 _nwis = USGSNWISAdapter()
 _xc = XenoCantoAdapter(api_key=os.environ.get("XC_API_KEY"))
 _soil = SoilGridsAdapter()
+_movebank = MovebankAdapter()
+_fluxnet = FLUXNETAdapter()
 
 # Conversation storage (fire-and-forget, never blocks tools)
 _store = SQLiteConversationStore()
@@ -310,6 +314,7 @@ async def ecology_describe_sources() -> dict:
         neon=_neon, obis=_obis, era5=_era5,
         inat=_inat, ebird=_ebird,
         gbif=_gbif, nwis=_nwis, xc=_xc,
+        movebank=_movebank, fluxnet=_fluxnet,
     )
 
 
@@ -1859,6 +1864,7 @@ async def ecology_sources_resource() -> str:
         neon=_neon, obis=_obis, era5=_era5,
         inat=_inat, ebird=_ebird,
         gbif=_gbif, nwis=_nwis, xc=_xc,
+        movebank=_movebank, fluxnet=_fluxnet,
     )
     return json.dumps(result, indent=2, default=str)
 

@@ -188,8 +188,8 @@ Existing search results get re-ranked based on graph context.
 - [x] Proactive notifications: agent subscribes to locations and gets alerted
 
 ### Milestone 5.4 — Additional Data Sources
-- [ ] Movebank (animal tracking / migration data)
-- [ ] FLUXNET (carbon/water/energy flux towers)
+- [x] Movebank (animal tracking / migration data)
+- [x] FLUXNET (carbon/water/energy flux towers)
 - [ ] Wildlife Insights (camera trap imagery)
 - [ ] Copernicus Land (satellite-derived land cover, NDVI)
 

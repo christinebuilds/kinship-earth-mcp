@@ -6,6 +6,7 @@ requires-python = ">=3.12"
 members = [
     "ebird-mcp",
     "era5-mcp",
+    "fluxnet-mcp",
     "gbif-mcp",
     "inaturalist-mcp",
     "kinship-earth",
@@ -13,6 +14,7 @@ members = [
     "kinship-orchestrator",
     "kinship-service",
     "kinship-shared",
+    "movebank-mcp",
     "neonscience-mcp",
     "obis-mcp",
     "soilgrids-mcp",
@@ -260,6 +262,23 @@ wheels = [
 ]
 
 [[package]]
+name = "fluxnet-mcp"
+version = "0.1.0"
+source = { editable = "servers/fluxnet" }
+dependencies = [
+    { name = "httpx" },
+    { name = "kinship-shared" },
+    { name = "mcp", extra = ["cli"] },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "httpx", specifier = ">=0.27" },
+    { name = "kinship-shared", editable = "shared" },
+    { name = "mcp", extras = ["cli"], specifier = ">=1.0" },
+]
+
+[[package]]
 name = "gbif-mcp"
 version = "0.1.0"
 source = { editable = "servers/gbif" }
@@ -429,11 +448,13 @@ source = { editable = "servers/orchestrator" }
 dependencies = [
     { name = "ebird-mcp" },
     { name = "era5-mcp" },
+    { name = "fluxnet-mcp" },
     { name = "gbif-mcp" },
     { name = "httpx" },
     { name = "inaturalist-mcp" },
     { name = "kinship-shared" },
     { name = "mcp", extra = ["cli"] },
+    { name = "movebank-mcp" },
     { name = "neonscience-mcp" },
     { name = "obis-mcp" },
     { name = "soilgrids-mcp" },
@@ -445,11 +466,13 @@ dependencies = [
 requires-dist = [
     { name = "ebird-mcp", editable = "servers/ebird" },
     { name = "era5-mcp", editable = "servers/era5" },
+    { name = "fluxnet-mcp", editable = "servers/fluxnet" },
     { name = "gbif-mcp", editable = "servers/gbif" },
     { name = "httpx", specifier = ">=0.27" },
     { name = "inaturalist-mcp", editable = "servers/inaturalist" },
     { name = "kinship-shared", editable = "shared" },
     { name = "mcp", extras = ["cli"], specifier = ">=1.0" },
+    { name = "movebank-mcp", editable = "servers/movebank" },
     { name = "neonscience-mcp", editable = "servers/neonscience" },
     { name = "obis-mcp", editable = "servers/obis" },
     { name = "soilgrids-mcp", editable = "servers/soilgrids" },
@@ -547,6 +570,23 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/d6/54/cfe61301667036ec958cb99bd3efefba235e65cdeb9c84d24a8293ba1d90/mdurl-0.1.2.tar.gz", hash = "sha256:bb413d29f5eea38f31dd4754dd7377d4465116fb207585f97bf925588687c1ba", size = 8729, upload-time = "2022-08-14T12:40:10.846Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b3/38/89ba8ad64ae25be8de66a6d463314cf1eb366222074cfda9ee839c56a4b4/mdurl-0.1.2-py3-none-any.whl", hash = "sha256:84008a41e51615a49fc9966191ff91509e3c40b939176e643fd50a5c2196b8f8", size = 9979, upload-time = "2022-08-14T12:40:09.779Z" },
+]
+
+[[package]]
+name = "movebank-mcp"
+version = "0.1.0"
+source = { editable = "servers/movebank" }
+dependencies = [
+    { name = "httpx" },
+    { name = "kinship-shared" },
+    { name = "mcp", extra = ["cli"] },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "httpx", specifier = ">=0.27" },
+    { name = "kinship-shared", editable = "shared" },
+    { name = "mcp", extras = ["cli"], specifier = ">=1.0" },
 ]
 
 [[package]]

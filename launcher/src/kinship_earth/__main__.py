@@ -40,6 +40,14 @@ SERVERS = {
         "module": "kinship_orchestrator.server",
         "description": "Cross-source tools: environmental context, unified search",
     },
+    "movebank": {
+        "module": "movebank_mcp.server",
+        "description": "Movebank — animal tracking and GPS telemetry (6,000+ studies)",
+    },
+    "fluxnet": {
+        "module": "fluxnet_mcp.server",
+        "description": "FLUXNET / AmeriFlux — carbon flux tower measurements (~950 sites)",
+    },
 }
 
 
