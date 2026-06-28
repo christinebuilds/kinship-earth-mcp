@@ -30,7 +30,7 @@
 | 11 | `011-ecosystem-state.md` | done | 2026-05-12 | 2026-05-11 | Phase 5.1 |
 | 12 | `012-anomaly-detection.md` | done | 2026-05-13 | 2026-05-11 | Phase 5.2 |
 | 13 | `013-event-synthesis.md` | done | 2026-05-14 | 2026-06-14 | Phase 5.3 |
-| 14 | `014-new-data-sources.md` | done | 2026-05-15 | 2026-06-18 | Phase 5.4 |
+| 14 | `014-new-data-sources.md` | done | 2026-05-15 | 2026-06-18 | Phase 5.4 (Movebank + FLUXNET; Wildlife Insights + Copernicus Land pending) |
 
 ### Status Key
 - `ready` — spec is written, detailed, and executable autonomously
@@ -44,6 +44,6 @@
 - **Specs ready:** 0
 - **Specs queued (need writing):** 0
 - **Specs done:** 14
-- **Buffer:** 0 specs ready — WRITE MORE SPECS next interactive session (URGENT)
+- **Buffer:** 0 — URGENT: next interactive session must write new specs before autonomous coding can continue
 
 > When buffer drops to 2 or fewer, the next interactive session should prioritize writing more specs.
