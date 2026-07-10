@@ -441,6 +441,12 @@ dependencies = [
     { name = "xenocanto-mcp" },
 ]
 
+[package.dev-dependencies]
+dev = [
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+]
+
 [package.metadata]
 requires-dist = [
     { name = "ebird-mcp", editable = "servers/ebird" },
@@ -455,6 +461,12 @@ requires-dist = [
     { name = "soilgrids-mcp", editable = "servers/soilgrids" },
     { name = "usgs-nwis-mcp", editable = "servers/usgs-nwis" },
     { name = "xenocanto-mcp", editable = "servers/xeno-canto" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "pytest", specifier = ">=9.0.2" },
+    { name = "pytest-asyncio", specifier = ">=1.3.0" },
 ]
 
 [[package]]
