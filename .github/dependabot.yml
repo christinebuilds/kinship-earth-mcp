@@ -1,0 +1,51 @@
+version: 2
+updates:
+  # Python deps across root + service + launcher + shared + all 10 MCP servers.
+  # Uses dependabot v2 `directories` (plural) to keep config compact.
+  - package-ecosystem: "pip"
+    directories:
+      - "/"
+      - "/shared"
+      - "/service"
+      - "/launcher"
+      - "/servers/orchestrator"
+      - "/servers/neonscience"
+      - "/servers/obis"
+      - "/servers/era5"
+      - "/servers/inaturalist"
+      - "/servers/usgs-nwis"
+      - "/servers/ebird"
+      - "/servers/gbif"
+      - "/servers/xeno-canto"
+      - "/servers/soilgrids"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "America/Los_Angeles"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      production-dependencies:
+        dependency-type: "production"
+        update-types:
+          - "minor"
+          - "patch"
+      dev-dependencies:
+        dependency-type: "development"
+
+  # Keep GitHub Actions workflows current
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "ci"
+    commit-message:
+      prefix: "chore(ci)"
