@@ -181,11 +181,11 @@ Existing search results get re-ranked based on graph context.
 - [ ] Alert tool: `ecology_check_anomalies` — "any unusual signals at this location?"
 - [ ] Anomaly → graph edge: anomalies become first-class graph entities
 
-### Milestone 5.3 — Event Synthesis
-- [ ] Implement `EcologicalEvent` classification (schema already defined)
-- [ ] Multi-anomaly → event correlation (e.g., low flow + high temp + die-off = drought cascade)
-- [ ] Historical analog matching ("this looks like the 2021 Klamath drought cascade")
-- [ ] Proactive notifications: agent subscribes to locations and gets alerted
+### Milestone 5.3 — Event Synthesis ✅ 2026-10-31
+- [x] Implement `EcologicalEvent` classification (schema already defined)
+- [x] Multi-anomaly → event correlation (e.g., low flow + high temp + die-off = drought cascade)
+- [x] Historical analog matching ("this looks like the 2021 Klamath drought cascade")
+- [x] Proactive notifications: agent subscribes to locations and gets alerted
 
 ### Milestone 5.4 — Additional Data Sources
 - [ ] Movebank (animal tracking / migration data)
