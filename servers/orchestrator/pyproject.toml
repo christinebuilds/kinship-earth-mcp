@@ -17,6 +17,8 @@ dependencies = [
     "gbif-mcp",
     "xenocanto-mcp",
     "soilgrids-mcp",
+    "movebank-mcp",
+    "fluxnet-mcp",
 ]
 
 [tool.uv.sources]
@@ -30,6 +32,8 @@ usgs-nwis-mcp = { workspace = true }
 gbif-mcp = { workspace = true }
 xenocanto-mcp = { workspace = true }
 soilgrids-mcp = { workspace = true }
+movebank-mcp = { workspace = true }
+fluxnet-mcp = { workspace = true }
 
 [build-system]
 requires = ["hatchling"]
