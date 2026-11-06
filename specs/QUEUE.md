@@ -31,6 +31,10 @@
 | 12 | `012-anomaly-detection.md` | done | 2026-05-13 | 2026-05-11 | Phase 5.2 |
 | 13 | `013-event-synthesis.md` | done | 2026-05-14 | 2026-10-31 | Phase 5.3 |
 | 14 | `014-new-data-sources.md` | done | 2026-05-15 | 2026-11-05 | Phase 5.4 |
+| 15 | `015-canon-schema.md` | ready | 2026-11-08 | | Phase 6 — Canon (docs/CANON.md) |
+| 16 | `016-first-node-taylor.md` | ready | 2026-11-09 | | Phase 6 — depends on 015 |
+| 17 | `017-canon-mcp-tools.md` | queued | | | canon_list/get/neighbors/check/propose |
+| 18 | `018-canon-ci-and-contributing.md` | queued | | | CI validation + node/evidence/edge PR guide |
 
 ### Status Key
 - `ready` — spec is written, detailed, and executable autonomously
@@ -41,9 +45,9 @@
 
 ## Inventory
 
-- **Specs ready:** 0
-- **Specs queued (need writing):** 0
+- **Specs ready:** 2
+- **Specs queued (need writing):** 2
 - **Specs done:** 14
-- **Buffer:** 0 specs ready — ⚠️ WRITE MORE SPECS before next autonomous session
+- **Buffer:** 2 specs ready — write 017/018 after 016 lands
 
 > When buffer drops to 2 or fewer, the next interactive session should prioritize writing more specs.
