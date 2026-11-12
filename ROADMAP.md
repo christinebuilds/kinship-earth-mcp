@@ -202,6 +202,40 @@ Existing search results get re-ranked based on graph context.
 
 ---
 
+## Phase 6 — "Is this normal for here?" (added 2026-11-12)
+
+**Goal:** Make the Phase 5 pipeline trustworthy and publish how often it is right, starting with rivers and watersheds. See `docs/DIRECTION.md`.
+
+**Dependency:** Phase 5
+
+### Milestone 6.1 — Honest baselines (spec 015)
+- [ ] Per-gauge day-of-year flow record, no pooling across gauges
+- [ ] 30-year climate normals with trend per decade
+- [ ] Percentile-based flow anomalies
+
+### Milestone 6.2 — Scorecard (spec 016)
+- [ ] Sourced reference list of documented flow events
+- [ ] No-look-ahead replay over past decades
+- [ ] Published hit rate, lead time and unmatched episodes
+
+### Milestone 6.3 — Pattern library (specs 017–018, 020–021)
+- [ ] Pattern file format, validator, graph extension
+- [ ] First pattern check (Taylor's power law on NEON bird counts)
+- [ ] MCP tools for the library
+- [ ] CI and contributor guide
+
+### Milestone 6.4 — Satellite base layer (spec 019)
+- [ ] Source cards: live greenness, Rangeland Analysis Platform, AlphaEarth embeddings, snowpack
+- [ ] First greenness adapter
+
+### Phase 6 Definition of Done
+- "Normal" means the place's own long record for that time of year
+- A public scorecard exists for the flow detector
+- At least five patterns have running checks
+- A satellite source is federated
+
+---
+
 ## Success Metrics
 
 | Metric | Phase 2 Target | Phase 4 Target | Phase 5 Target |

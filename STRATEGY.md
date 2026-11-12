@@ -1,6 +1,8 @@
 # Kinship Earth — Technical Strategy
 
 > Last updated: 2026-04-15
+>
+> **Partly superseded 2026-11-12 — see docs/DIRECTION.md.** Kinship Earth is non-commercial, so the pricing and free/pro tier material no longer applies. The "Competitive Moat" section (proprietary conversation corpus, cross-user emergence as moat) is retired: the federation is a public verifier, and per-user memory stays opt-in. The architecture and federation sections still describe the code.
 
 ## Vision
 
