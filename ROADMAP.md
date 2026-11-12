@@ -202,6 +202,19 @@ Existing search results get re-ranked based on graph context.
 
 ---
 
+## Phase 6 — The Kinship Canon
+
+> Design: `docs/CANON.md`. One node per known ecological pattern, with
+> evidence, regime, and an executable check against the federation.
+
+### Milestone 6.1 — Canon Foundation
+- [x] Canon schema, loader, `pattern` entity + 9 evidential edge types, validator CLI (spec 015) ✅ 2026-11-12
+- [ ] First node end to end: Taylor's power law on NEON landbird counts (spec 016)
+- [ ] Canon MCP tools: list / get / neighbors / check / propose (spec 017)
+- [ ] CI validation + contributing guide for node/evidence/edge PRs (spec 018)
+
+---
+
 ## Success Metrics
 
 | Metric | Phase 2 Target | Phase 4 Target | Phase 5 Target |

@@ -23,6 +23,7 @@ EntityType = Literal[
     "query",
     "finding",
     "data_source",
+    "pattern",
 ]
 
 RelationshipType = Literal[
@@ -36,6 +37,28 @@ RelationshipType = Literal[
     "MONITORED_BY",
     "SOURCED_FROM",
     "SIMILAR_TO",
+    # Canon evidential edges (docs/CANON.md)
+    "DERIVES_FROM",
+    "GENERALIZES",
+    "SPECIAL_CASE_OF",
+    "SUPPORTS",
+    "CONTRADICTS",
+    "REQUIRES",
+    "ANALOG_OF",
+    "TESTED_BY",
+    "EVIDENCED_BY",
+]
+
+CanonEdgeType = Literal[
+    "DERIVES_FROM",
+    "GENERALIZES",
+    "SPECIAL_CASE_OF",
+    "SUPPORTS",
+    "CONTRADICTS",
+    "REQUIRES",
+    "ANALOG_OF",
+    "TESTED_BY",
+    "EVIDENCED_BY",
 ]
 
 
@@ -109,3 +132,8 @@ def make_user_id(user_id: str) -> str:
 def make_source_id(adapter_id: str) -> str:
     """ID for a data source entity."""
     return f"source:{adapter_id}"
+
+
+def make_pattern_id(slug: str) -> str:
+    """ID for a canon pattern entity (slug is the canon node id)."""
+    return f"pattern:{slug}"
