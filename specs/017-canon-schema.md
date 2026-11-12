@@ -1,13 +1,13 @@
-# Spec 015: Canon Schema and Graph Extension
+# Spec 017: Canon Schema and Graph Extension
 
 > Phase 6 — The Canon (see docs/CANON.md)
 > Priority: P0
 > Estimated effort: 1 session
-> Dependency: None
+> Dependency: None (queued after 015–016; see docs/DIRECTION.md)
 
 ## Objective
 
-Create the `canon/` directory, a Pydantic model and validator for canon node files, and extend the knowledge-graph ontology so canon nodes and their evidential edges can be loaded into `graph_store.py`. No MCP tools yet (spec 017). No real nodes yet beyond one fixture (spec 016 ships the first real one).
+Create the `canon/` directory, a Pydantic model and validator for canon node files, and extend the knowledge-graph ontology so canon nodes and their evidential edges can be loaded into `graph_store.py`. No MCP tools yet (spec 020). No real nodes yet beyond one fixture (spec 018 ships the first real one).
 
 ## What to Build
 
@@ -75,7 +75,7 @@ Implement the front-matter schema from docs/CANON.md as Pydantic models:
 ## Commit
 
 ```
-Add canon schema, loader, and pattern entity type (spec 015)
+Add canon schema, loader, and pattern entity type (spec 017)
 
 - CanonNode Pydantic model + validation rules
 - canon_loader: front matter → node → graph

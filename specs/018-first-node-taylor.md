@@ -1,9 +1,9 @@
-# Spec 016: First Canon Node — Taylor's Power Law on NEON Landbird Counts
+# Spec 018: First Canon Node — Taylor's Power Law on NEON Landbird Counts
 
 > Phase 6 — The Canon (see docs/CANON.md)
 > Priority: P0
 > Estimated effort: 1 session
-> Dependency: Spec 015
+> Dependency: Spec 017
 
 ## Objective
 
@@ -72,7 +72,7 @@ Add stubs for `tweedie-distributions`, `fluctuation-scaling-physics`, `density-d
 ## Do Not
 
 - Do not fit on presence-only sources (GBIF, iNaturalist). Record this prohibition in the node.
-- Do not add new MCP tools (spec 017).
+- Do not add new MCP tools (spec 020).
 - Do not add eBird as a second check yet; note it as a TODO in the node.
 
 ## Definition of Done
@@ -84,7 +84,7 @@ Add stubs for `tweedie-distributions`, `fluctuation-scaling-physics`, `density-d
 ## Commit
 
 ```
-Add first canon node: Taylor's power law on NEON landbird counts (spec 016)
+Add first canon node: Taylor's power law on NEON landbird counts (spec 018)
 
 - NEON adapter: get_product_data for tabular products
 - canon/checks/taylors_power_law.py with bootstrap CI and figure
