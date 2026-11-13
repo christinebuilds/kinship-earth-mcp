@@ -31,11 +31,12 @@
 | 12 | `012-anomaly-detection.md` | done | 2026-05-13 | 2026-05-11 | Phase 5.2 |
 | 13 | `013-event-synthesis.md` | done | 2026-05-14 | 2026-10-31 | Phase 5.3 |
 | 14 | `014-new-data-sources.md` | done | 2026-05-15 | 2026-11-05 | Phase 5.4 |
-| 15 | `015-honest-baselines.md` | ready | 2026-11-13 | | Phase 6 — per-gauge day-of-year flow record, 30-yr climate normals (docs/DIRECTION.md) |
-| 16 | `016-history-replay-scorecard.md` | ready | 2026-11-14 | | Phase 6 — depends on 015; needs web search for event sources |
+| 15 | `015-honest-baselines.md` | blocked | 2026-11-13 | | Phase 6. Offline half done 2026-11-13 (FlowClimatology, flow_percentile, percentile FlowDetector, tests). Blocked: the runner's network refuses api.waterdata.usgs.gov and archive-api.open-meteo.com, and the spec requires live calls before building the adapter paging and 30-yr normals |
+| 16 | `016-history-replay-scorecard.md` | blocked | 2026-11-14 | | Phase 6 — depends on 015; needs web search for event sources and live USGS data |
 | 17 | `017-canon-schema.md` | done | 2026-11-15 | 2026-11-12 | Phase 6 — pattern files + graph extension (docs/CANON.md). Built early under old number 015; INFORMS edge type added 2026-11-13 |
-| 18 | `018-first-node-taylor.md` | ready | 2026-11-16 | | Phase 6 — depends on 017 |
+| 18 | `018-first-node-taylor.md` | blocked | 2026-11-16 | | Phase 6 — depends on 017 (done). Blocked: needs live data.neonscience.org, refused by the runner's network |
 | 19 | `019-satellite-source-cards.md` | queued | | | Source cards + first greenness adapter |
+| 22 | `022-neighborhood-companion.md` | queued | | | Small spec, alongside river work (Christine, 2026-11-13): seasonal-changes-near-home tool |
 | 20 | `020-canon-mcp-tools.md` | queued | | | canon_list/get/neighbors/check/propose |
 | 21 | `021-canon-ci-and-contributing.md` | queued | | | CI validation + pattern/evidence/edge PR guide |
 
@@ -48,9 +49,9 @@
 
 ## Inventory
 
-- **Specs ready:** 3
-- **Specs queued (need writing):** 3
+- **Specs ready:** 0 (3 blocked on network access)
+- **Specs queued (need writing):** 4
 - **Specs done:** 15
-- **Buffer:** 3 specs ready — write 019 after 016 lands
+- **Buffer:** 0 runnable until the runner can reach the data APIs
 
 > When buffer drops to 2 or fewer, the next interactive session should prioritize writing more specs.

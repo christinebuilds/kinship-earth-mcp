@@ -482,6 +482,14 @@ class EcosystemState(BaseModel):
     # Hydrological signals
     streamflow_cfs: Optional[float] = Field(default=None, description="Current streamflow (cubic feet/sec)")
     streamflow_baseline: Optional[float] = Field(default=None, description="30-year normal for this date")
+    streamflow_percentile: Optional[float] = Field(
+        default=None, description="Percentile (0-100) of current flow in the gauge's own record for this time of year"
+    )
+    streamflow_baseline_kind: Optional[str] = Field(
+        default=None, description="'doy_record' when the baseline is the gauge's day-of-year record"
+    )
+    streamflow_site_id: Optional[str] = Field(default=None, description="Gauge the flow baseline comes from")
+    streamflow_record_years: Optional[int] = Field(default=None, description="Years of record behind the flow baseline")
     soil_moisture_pct: Optional[float] = Field(default=None, description="Volumetric water content")
     precipitation_7d_mm: Optional[float] = Field(default=None, description="7-day precipitation total")
 

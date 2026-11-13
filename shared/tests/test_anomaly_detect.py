@@ -118,3 +118,43 @@ def test_anomaly_id_format():
     assert "anomaly:" in aid
     assert "2023-07-15" in aid
     assert "temperature" in aid
+
+
+# ---------------------------------------------------------------------------
+# Percentile-based flow anomalies (spec 015)
+# ---------------------------------------------------------------------------
+
+def test_flow_low_percentile_fires_warning():
+    state = _make_state(
+        streamflow_cfs=84.0, streamflow_baseline=310.0, streamflow_percentile=3,
+        streamflow_baseline_kind="doy_record", streamflow_site_id="USGS-11467000",
+        streamflow_record_years=62,
+    )
+    anomalies = FlowDetector().detect(location=loc, observations=[], state=state)
+    assert len(anomalies) == 1
+    a = anomalies[0]
+    assert a.severity == "warning"
+    assert "percentile" in a.description
+    assert "62 years of record" in a.description and "USGS-11467000" in a.description
+    assert a.deviation_pct < 0
+
+
+def test_flow_median_percentile_is_quiet():
+    state = _make_state(streamflow_cfs=300.0, streamflow_baseline=310.0, streamflow_percentile=50)
+    assert FlowDetector().detect(location=loc, observations=[], state=state) == []
+
+
+def test_flow_percentile_severity_bands():
+    def sev(p):
+        s = _make_state(streamflow_cfs=10.0, streamflow_baseline=100.0, streamflow_percentile=p)
+        return FlowDetector().detect(location=loc, observations=[], state=s)[0].severity
+    assert sev(1) == "critical" and sev(99) == "critical"
+    assert sev(5) == "warning" and sev(96) == "warning"
+    assert sev(10) == "info" and sev(90) == "info"
+
+
+def test_flow_without_percentile_uses_percent_of_mean():
+    state = _make_state(streamflow_cfs=200.0, streamflow_baseline=100.0)
+    anomalies = FlowDetector().detect(location=loc, observations=[], state=state)
+    assert len(anomalies) == 1
+    assert "above normal" in anomalies[0].description

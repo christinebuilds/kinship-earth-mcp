@@ -9,7 +9,7 @@ Baselines are the reference against which anomalies are detected.
 from __future__ import annotations
 
 import math
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from typing import Optional
 
 from pydantic import BaseModel, Field
@@ -33,6 +33,100 @@ class BaselineValues(BaseModel):
     species_richness_mean: Optional[int] = None
     ndvi_mean: Optional[float] = None
     ndvi_std: Optional[float] = None
+
+
+class FlowClimatology(BaseModel):
+    """A gauge's own record for one time of year: what 'normal' flow means here."""
+
+    site_id: str
+    day_of_year: int
+    window_days: int = Field(description="Half-width of the day-of-year window")
+    years_of_data: int
+    n_values: int
+    p05: float
+    p10: float
+    p25: float
+    p50: float
+    p75: float
+    p90: float
+    p95: float
+    record_start: date
+    record_end: date
+
+
+def _doy_distance(a: date, target: date) -> int:
+    """Days between two dates' positions in the year, wrapping at year end."""
+    d = abs(a.timetuple().tm_yday - target.timetuple().tm_yday)
+    return min(d, 366 - d)
+
+
+def _window_values(
+    record: list[tuple[date, float]], target: date, window_days: int
+) -> list[tuple[date, float]]:
+    """Values within ±window_days of the target day-of-year, from every year
+    except the target's own."""
+    return [
+        (d, v) for d, v in record
+        if d.year != target.year and v is not None and _doy_distance(d, target) <= window_days
+    ]
+
+
+def _quantile(sorted_values: list[float], q: float) -> float:
+    """Linear-interpolation quantile of an already sorted list, q in [0, 1]."""
+    if len(sorted_values) == 1:
+        return sorted_values[0]
+    pos = q * (len(sorted_values) - 1)
+    lo = int(math.floor(pos))
+    hi = min(lo + 1, len(sorted_values) - 1)
+    return sorted_values[lo] + (sorted_values[hi] - sorted_values[lo]) * (pos - lo)
+
+
+def flow_climatology(
+    record: list[tuple[date, float]],
+    target: date,
+    window_days: int = 7,
+    min_years: int = 10,
+    site_id: str = "",
+) -> Optional[FlowClimatology]:
+    """Day-of-year flow percentiles from a gauge's daily record.
+
+    Returns None when fewer than ``min_years`` distinct years contribute.
+    There is deliberately no fallback to a shorter window.
+    """
+    window = _window_values(record, target, window_days)
+    years = {d.year for d, _ in window}
+    if len(years) < min_years:
+        return None
+    values = sorted(v for _, v in window)
+    q = lambda x: round(_quantile(values, x), 3)  # noqa: E731
+    return FlowClimatology(
+        site_id=site_id,
+        day_of_year=target.timetuple().tm_yday,
+        window_days=window_days,
+        years_of_data=len(years),
+        n_values=len(values),
+        p05=q(0.05), p10=q(0.10), p25=q(0.25), p50=q(0.50),
+        p75=q(0.75), p90=q(0.90), p95=q(0.95),
+        record_start=min(d for d, _ in record),
+        record_end=max(d for d, _ in record),
+    )
+
+
+def flow_percentile(
+    value: float,
+    record: list[tuple[date, float]],
+    target: date,
+    window_days: int = 7,
+) -> Optional[float]:
+    """Empirical percentile (0–100) of ``value`` among the record's values for
+    this time of year. 0 = below everything on record, 100 = above everything.
+    Returns None if the record has no values in the window."""
+    values = [v for _, v in _window_values(record, target, window_days)]
+    if not values:
+        return None
+    below = sum(1 for v in values if v < value)
+    equal = sum(1 for v in values if v == value)
+    return round(100.0 * (below + 0.5 * equal) / len(values), 1)
 
 
 def compute_deviation(current: float, baseline_mean: float, baseline_std: float) -> float:

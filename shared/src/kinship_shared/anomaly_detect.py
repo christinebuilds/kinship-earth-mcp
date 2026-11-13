@@ -86,6 +86,8 @@ class FlowDetector(AnomalyDetector):
         return "flow"
 
     def detect(self, *, location, observations, baseline=None, state=None):
+        if state is not None and state.streamflow_percentile is not None:
+            return self._detect_by_percentile(location, state)
         if state is None or state.streamflow_cfs is None or state.streamflow_baseline is None:
             return []
         if state.streamflow_baseline < 1.0:
@@ -111,6 +113,55 @@ class FlowDetector(AnomalyDetector):
             description=f"Streamflow {abs(deviation_pct):.0f}% {direction} normal ({signal}): {state.streamflow_cfs:.0f} cfs vs baseline {state.streamflow_baseline:.0f} cfs",
             sources=["usgs-nwis"],
             confidence=min(1.0, abs(deviation_pct) / 200.0),
+        )]
+
+
+    @staticmethod
+    def _ordinal(n: float) -> str:
+        i = int(round(n))
+        suffix = "th" if 10 <= i % 100 <= 20 else {1: "st", 2: "nd", 3: "rd"}.get(i % 10, "th")
+        return f"{i}{suffix}"
+
+    def _detect_by_percentile(self, location, state):
+        """Flow against the gauge's own day-of-year record (spec 015)."""
+        pct = state.streamflow_percentile
+        if 10 < pct < 90:
+            return []
+        if pct <= 2 or pct >= 98:
+            severity = "critical"
+        elif pct <= 5 or pct >= 95:
+            severity = "warning"
+        else:
+            severity = "info"
+
+        median = state.streamflow_baseline
+        deviation_pct = None
+        if state.streamflow_cfs is not None and median:
+            deviation_pct = round((state.streamflow_cfs - median) / median * 100, 1)
+
+        record = []
+        if state.streamflow_record_years:
+            record.append(f"{state.streamflow_record_years} years of record")
+        if state.streamflow_site_id:
+            record.append(state.streamflow_site_id)
+        description = f"Streamflow at the {self._ordinal(pct)} percentile for this date"
+        if record:
+            description += f" ({', '.join(record)})"
+        if state.streamflow_cfs is not None and median is not None:
+            description += f": {state.streamflow_cfs:.0f} cfs vs median {median:.0f} cfs"
+
+        return [EcologicalAnomaly(
+            id=_make_anomaly_id("flow", location.lat, location.lng, state.timestamp),
+            anomaly_type="flow",
+            location=location,
+            detected_at=state.timestamp,
+            signal_value=state.streamflow_cfs if state.streamflow_cfs is not None else pct,
+            baseline_value=median if median is not None else 50.0,
+            deviation_pct=deviation_pct if deviation_pct is not None else round(pct - 50.0, 1),
+            severity=severity,
+            description=description,
+            sources=["usgs-nwis"],
+            confidence=round(min(1.0, abs(pct - 50.0) / 50.0), 2),
         )]
 
 
