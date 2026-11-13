@@ -93,13 +93,43 @@ When starting an autonomous session (no human present):
 7. **Update ROADMAP.md** — check off completed items
 8. **Check spec buffer** — if 2 or fewer specs remain `ready`, note this in commit message so the next interactive session knows to write more specs
 
+### Bugs from chats (decided by Christine, 2026-11-13)
+
+Problems from Kinship Earth chats arrive as GitHub issues labeled `bug` plus
+`from-chat` (reported in a chat) or `auto-reported` (a tool errored). Handle
+them at the start of every run, before specs:
+
+1. List open issues with label `bug` that have no `fix-ready` label.
+2. Reproduce. If it is not a bug, or a data source's own outage, comment why
+   and close it.
+3. Otherwise fix it on a branch `fix/issue-<N>` from `main`, with a test that
+   fails before the fix. Run the offline suite. Open a PR whose body says
+   `Fixes #<N>`, and add label `fix-ready` to the issue. (This is the one
+   exception to "no PRs autonomously".)
+4. File a decision in the Project Radar (see claude-config
+   `multicore/README.md`): id `merge-fix-<N>`, question "Merge the fix for bug
+   #<N>: <title>?", options "Merge / Hold", recommendation, blocking `none`,
+   source = the PR link.
+5. When that decision is `answered` with a yes, merge the PR (the issue closes
+   and Railway redeploys), then mark the decision `applied`. On anything else,
+   leave the PR open and say so in the decision.
+
+Never merge a fix without that answer.
+
+Issues labeled `data-gap` are product requests, not bugs: Christine asked for
+something the tools could not answer. Treat them as a PM would: find the open
+data that would answer it, write a spec for it in `specs/` (status `ready` in
+QUEUE.md if it fits docs/DIRECTION.md, otherwise `queued`), link the issue,
+and file a Project Radar decision asking whether to queue it. Close the issue
+when the spec ships.
+
 ### If a spec is blocked:
 - Mark it as `blocked` in QUEUE.md with a note explaining why
 - Move to the next `ready` spec
 - Do NOT skip queued (unwritten) specs — stop and flag
 
 ### Branch strategy:
-- Work on branch `claude/canon-foundation` until Christine merges it into `main`; after that, branch from `main`. (The older `claude/mcp-chat-integration-8Tpu4` branch is behind `main` and does not have specs 015+.)
+- `claude/canon-foundation` is merged; branch from `main`. (The older `claude/mcp-chat-integration-8Tpu4` branch is behind `main` and does not have specs 015+.)
 - Push after each spec completion
 - Do not create PRs autonomously — the human will review and merge
 
