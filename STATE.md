@@ -1,35 +1,30 @@
 # STATE — Kinship Earth MCP
 
-_Last updated: 2026-11-12 by Claude (multicore setup session)_
+_Last updated: 2026-11-13 by Claude (setup session). The runner rewrites this at each park._
 
 ## Where we are
-Specs 001–014 are done; the last two shipped Oct 31 (event synthesis) and
-Nov 5 (Movebank + FLUXNET adapters). Phase 6, the Kinship Canon, is designed
-but not built: `docs/CANON.md` plus specs 015 and 016 are written and `ready`.
-This branch is `main` plus the two `claude/canon-foundation` commits.
+Direction reset on 2026-11-12: read `docs/DIRECTION.md` first. The question is
+"is this normal for here, and what usually follows?", rivers first. Specs were
+renumbered: 015 honest baselines, 016 replay scorecard, 017 canon schema,
+018 first pattern check. The runner's earlier canon-schema work (branch
+`claude/runner-kinship-earth`) was built under the old numbering and maps to 017.
 
 ## Next up (no decision needed)
-1. Execute `specs/015-canon-schema.md` (canon schema).
-2. Execute `specs/016-first-node-taylor.md` (first canon node: Taylor's power
-   law against NEON breeding-bird counts). Depends on 015.
-3. Write specs 017 (canon MCP tools) and 018 (canon CI + contributing guide);
-   both are `queued` placeholders in `specs/QUEUE.md`.
-4. Refresh "Current Status" in `CLAUDE.md` (dated 2026-04-15, predates
-   Phase 5 and the Canon).
+1. Spec 015: honest baselines — Russian River, plus Mission Creek in San
+   Francisco (Christine's answer, 2026-11-13).
+2. Spec 016: replay history and publish a scorecard.
+3. A small spec for a neighborhood nature companion (bird ID and seasonal
+   changes near home), alongside the river work.
 
 ## Waiting on Christine
-See Notion → Home Stack → Decisions, Project = Kinship Earth:
-- Retire the proprietary conversation-corpus "moat" framing?
-- Who are the first two domain reviewers for the Canon?
-- Merge `claude/canon-foundation` into main, or keep it as a branch?
+Decisions now live in the Project Radar artifact
+(https://claude.ai/artifact/4e5P3qeCmC1rctQUrn651Q), not Notion.
 
 ## Recently done
-- 2026-11-12 — STATE.md added; multicore protocol set up
-- 2026-11-06 — Canon foundation doc, specs 015/016, Field Notebook game concept
+- 2026-11-13 — Hosted /mcp endpoint accepts its public host (fixes claude.ai connector)
+- 2026-11-12 — Canon foundation and November direction merged to main
 - 2026-11-05 — Movebank and FLUXNET adapters (spec 014)
-- 2026-10-31 — Event synthesis pipeline (spec 013)
 
 ## How to resume
-- Protocol: "Autonomous Session Protocol" in `CLAUDE.md`, queue in `specs/QUEUE.md`.
 - Offline tests: the `-k "not (...)"` command under Testing in `CLAUDE.md`.
 - Never push to main; no PRs unless Christine asks.
