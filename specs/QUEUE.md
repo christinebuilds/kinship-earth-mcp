@@ -36,7 +36,7 @@
 | 17 | `017-canon-schema.md` | done | 2026-11-15 | 2026-11-12 | Phase 6 — pattern files + graph extension (docs/CANON.md). Built early under old number 015; INFORMS edge type added 2026-11-13 |
 | 18 | `018-first-node-taylor.md` | blocked | 2026-11-16 | | Phase 6 — depends on 017 (done). Blocked: needs live data.neonscience.org, refused by the runner's network |
 | 19 | `019-satellite-source-cards.md` | queued | | | Source cards + first greenness adapter |
-| 22 | `022-neighborhood-companion.md` | queued | | | Small spec, alongside river work (Christine, 2026-11-13): seasonal-changes-near-home tool |
+| 22 | `022-neighborhood-companion.md` | ready | 2026-11-14 | | Alongside river work (Christine, 2026-11-13): `ecology_whats_changed`, arrivals and departures near home. Buildable offline |
 | 20 | `020-canon-mcp-tools.md` | queued | | | canon_list/get/neighbors/check/propose |
 | 21 | `021-canon-ci-and-contributing.md` | queued | | | CI validation + pattern/evidence/edge PR guide |
 
@@ -49,9 +49,9 @@
 
 ## Inventory
 
-- **Specs ready:** 0 (3 blocked on network access)
-- **Specs queued (need writing):** 4
+- **Specs ready:** 1 (022), plus 3 blocked on network access
+- **Specs queued (need writing):** 3
 - **Specs done:** 15
-- **Buffer:** 0 runnable until the runner can reach the data APIs
+- **Buffer:** 1 runnable (022) until the runner can reach the data APIs
 
 > When buffer drops to 2 or fewer, the next interactive session should prioritize writing more specs.
