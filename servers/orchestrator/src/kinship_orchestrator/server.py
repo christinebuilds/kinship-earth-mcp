@@ -1416,6 +1416,36 @@ async def ecology_feedback(
         return {"error": f"Turn {turn_id} not found"}
 
 
+@mcp.tool()
+async def ecology_report_problem(
+    summary: str,
+    what_happened: str,
+    expected: str = "",
+    tool_name: str = "",
+) -> dict:
+    """
+    Report a problem with Kinship Earth so it gets tracked and fixed.
+
+    Call this when the person says a result is wrong, missing or broken, or
+    when you notice a tool gave an answer that cannot be right (a bird far out
+    of range, empty results where there should be many, an error). It files a
+    public GitHub issue that the project's agent fixes and closes.
+
+    Do not include the chat text, names, photos or exact locations: write a
+    one-line summary and a short neutral description. Coordinates are rounded
+    to about 1 km automatically.
+
+    Args:
+        summary: One line, e.g. "whats_around_me returns no birds for San Francisco".
+        what_happened: What the tool returned or did.
+        expected: What should have happened, if known.
+        tool_name: The Kinship Earth tool involved, if any.
+    """
+    from .problem_reports import report_problem
+
+    return await report_problem(summary, what_happened, expected, tool_name)
+
+
 # ---------------------------------------------------------------------------
 # Prompts — curated multi-step workflows for agents
 # ---------------------------------------------------------------------------
@@ -1875,6 +1905,12 @@ async def ecology_sources_resource() -> str:
         movebank=_movebank, fluxnet=_fluxnet,
     )
     return json.dumps(result, indent=2, default=str)
+
+
+# Report tool failures as GitHub issues (no-op without GITHUB_TOKEN).
+from .problem_reports import watch_tools as _watch_tools  # noqa: E402
+
+_watch_tools(mcp)
 
 
 # ---------------------------------------------------------------------------
