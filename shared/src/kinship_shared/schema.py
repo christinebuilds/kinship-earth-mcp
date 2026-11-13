@@ -481,7 +481,9 @@ class EcosystemState(BaseModel):
 
     # Hydrological signals
     streamflow_cfs: Optional[float] = Field(default=None, description="Current streamflow (cubic feet/sec)")
-    streamflow_baseline: Optional[float] = Field(default=None, description="30-year normal for this date")
+    streamflow_baseline: Optional[float] = Field(default=None, description="Day-of-year median from long record")
+    streamflow_percentile: Optional[float] = Field(default=None, description="Empirical percentile vs DOY record (0-100)")
+    streamflow_baseline_kind: Optional[str] = Field(default=None, description="'doy_record' or 'insufficient_record'")
     soil_moisture_pct: Optional[float] = Field(default=None, description="Volumetric water content")
     precipitation_7d_mm: Optional[float] = Field(default=None, description="7-day precipitation total")
 

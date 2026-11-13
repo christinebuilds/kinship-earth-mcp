@@ -119,6 +119,20 @@ These combine multiple data sources in a single answer:
 
 ---
 
+## How "Normal" Is Defined
+
+Streamflow baselines use each gauge's own day-of-year record — values within
+±7 days of the target date, across all prior years on record (typically 40–80
+years for established USGS gauges), from a single nearest gauge. No pooling
+across gauges. The result is expressed as a percentile (1 = driest 1% for
+this date, 99 = wettest); anomalies fire at ≤10th or ≥90th percentile.
+
+Climate (temperature, precipitation) baselines use 30 years of ERA5 data
+centered on the target day-of-year, with a reported warming trend (°C/decade)
+so callers can distinguish unusual-for-this-date from unusual-for-this-decade.
+
+---
+
 ## Available MCP Tools
 
 | Tool | What it does |

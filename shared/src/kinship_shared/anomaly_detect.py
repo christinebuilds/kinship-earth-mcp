@@ -80,15 +80,65 @@ class TemperatureDetector(AnomalyDetector):
         )]
 
 
+def _flow_severity_from_percentile(pct: float) -> str | None:
+    """Return severity for a flow percentile, or None if not anomalous."""
+    if pct <= 2 or pct >= 98:
+        return "critical"
+    if pct <= 5 or pct >= 95:
+        return "warning"
+    if pct <= 10 or pct >= 90:
+        return "info"
+    return None
+
+
 class FlowDetector(AnomalyDetector):
     @property
     def anomaly_type(self) -> AnomalyType:
         return "flow"
 
     def detect(self, *, location, observations, baseline=None, state=None):
-        if state is None or state.streamflow_cfs is None or state.streamflow_baseline is None:
+        if state is None or state.streamflow_cfs is None:
             return []
-        if state.streamflow_baseline < 1.0:
+
+        # Percentile path — preferred when day-of-year record is available
+        if state.streamflow_percentile is not None:
+            pct = state.streamflow_percentile
+            severity = _flow_severity_from_percentile(pct)
+            if severity is None:
+                return []
+
+            baseline_cfs = state.streamflow_baseline or 0.0
+            deviation_pct = (
+                ((state.streamflow_cfs - baseline_cfs) / baseline_cfs) * 100
+                if baseline_cfs > 1.0 else 0.0
+            )
+            clim = getattr(state, "_climatology", None)
+            record_years = clim.get("years_of_data", 0) if isinstance(clim, dict) else 0
+            site_id = state.streamflow_baseline_kind and state.streamflow_baseline_kind.startswith("doy") and ""
+            direction = "above" if deviation_pct > 0 else "below"
+
+            desc = (
+                f"Streamflow at the {pct:.0f}th percentile for this date"
+                f"{(' (' + str(record_years) + ' years of record)') if record_years else ''}: "
+                f"{state.streamflow_cfs:.0f} cfs vs median {baseline_cfs:.0f} cfs"
+            )
+
+            return [EcologicalAnomaly(
+                id=_make_anomaly_id("flow", location.lat, location.lng, state.timestamp),
+                anomaly_type="flow",
+                location=location,
+                detected_at=state.timestamp,
+                signal_value=state.streamflow_cfs,
+                baseline_value=baseline_cfs,
+                deviation_pct=round(deviation_pct, 1),
+                severity=severity,
+                description=desc,
+                sources=["usgs-nwis"],
+                confidence=min(1.0, abs(50 - pct) / 50.0),
+            )]
+
+        # Percent-of-mean fallback — kept intact so existing tests pass
+        if state.streamflow_baseline is None or state.streamflow_baseline < 1.0:
             return []
 
         deviation_pct = ((state.streamflow_cfs - state.streamflow_baseline) / state.streamflow_baseline) * 100

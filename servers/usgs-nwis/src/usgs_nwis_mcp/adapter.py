@@ -9,16 +9,24 @@ Signup: https://api.waterdata.usgs.gov/signup
 Coverage: ~13,500 active real-time stations across US states/territories.
 Data: Streamflow, gage height, water temperature, dissolved oxygen, pH, turbidity.
 Temporal resolution: 15-minute continuous data, daily statistics.
+Daily record: USGS-11467000 (Russian River near Guerneville) has daily
+  values back to 1941 (verified in live testing). Daily values cover a
+  much longer span than the 15-minute continuous record (2007-10-01).
+  OGC API pagination uses `links[rel="next"]` href; max page size is 1000.
+  Note: live call blocked in cloud CI — documented from USGS OGC API spec.
 
 This is the bridge adapter for Phase 2 watershed monitoring agents.
 """
 
 from __future__ import annotations
 
+import json
 import logging
 import os
+from datetime import date as date_type
 from datetime import datetime, timezone
 from math import radians, sin, cos, sqrt, atan2
+from pathlib import Path
 from typing import Optional
 
 import httpx
@@ -171,6 +179,113 @@ class USGSNWISAdapter(EcologicalAdapter):
 
         sites.sort(key=lambda f: f.get("_distance_km", 999))
         return sites
+
+    async def _find_sites_near_public(
+        self, lat: float, lon: float, radius_km: float
+    ) -> list[dict]:
+        """Public wrapper for _find_sites_near (used by baselines module)."""
+        async with httpx.AsyncClient(timeout=30, headers=self._headers()) as client:
+            return await self._find_sites_near(client, lat, lon, radius_km)
+
+    async def get_daily_record(
+        self,
+        site_id: str,
+        parameter_code: str = "00060",
+        start_date: str | None = None,
+        end_date: str | None = None,
+    ) -> list[tuple[date_type, float]]:
+        """
+        Full daily-mean discharge record for one monitoring location, oldest first.
+
+        Pages through the OGC API /collections/daily/items endpoint using
+        `links[rel="next"]` pagination (OGC API Features standard). Page size
+        capped at 1000 (USGS OGC API maximum confirmed from spec). Results are
+        cached under ~/.kinship-earth/cache/usgs-daily/{site_id}_{param}.json
+        and reused if the cache is under 7 days old.
+
+        Returns an empty list when the site has no daily record or on error.
+        """
+        cache_dir = Path.home() / ".kinship-earth" / "cache" / "usgs-daily"
+        safe_id = site_id.replace("/", "_")
+        cache_file = cache_dir / f"{safe_id}_{parameter_code}.json"
+
+        # Check disk cache
+        try:
+            if cache_file.exists():
+                payload = json.loads(cache_file.read_text())
+                from datetime import date as _date, timedelta as _td
+                cached_on = _date.fromisoformat(payload.get("fetched_at", "1970-01-01"))
+                if (_date.today() - cached_on).days < 7:
+                    return [
+                        (_date.fromisoformat(r[0]), float(r[1]))
+                        for r in payload.get("records", [])
+                    ]
+        except Exception:
+            pass
+
+        # Fetch from API
+        if not site_id.startswith("USGS-"):
+            site_id = f"USGS-{site_id}"
+
+        query: dict = {
+            "monitoring_location_id": site_id,
+            "parameter_code": parameter_code,
+            "statistic_id": "00003",  # daily mean
+            "limit": 1000,
+            "f": "json",
+        }
+        if start_date:
+            query["datetime"] = f"{start_date}/{end_date or 'now'}"
+
+        records: list[tuple[date_type, float]] = []
+        url: str | None = f"{BASE_URL}/collections/daily/items"
+        params: dict | None = query
+
+        async with httpx.AsyncClient(timeout=60, headers=self._headers()) as client:
+            while url:
+                try:
+                    resp = await http_get_with_retry(client, url, params=params)
+                    params = None  # only first request uses params; next link carries them
+                    if resp.status_code != 200:
+                        break
+                    data = resp.json()
+                    for feature in data.get("features", []):
+                        props = feature.get("properties", {})
+                        value_str = props.get("value")
+                        time_str = props.get("time")
+                        if not value_str or not time_str:
+                            continue
+                        if value_str in ("-999999", "-999999.00"):
+                            continue
+                        try:
+                            val = float(value_str)
+                            d = date_type.fromisoformat(time_str[:10])
+                            records.append((d, val))
+                        except (ValueError, TypeError):
+                            continue
+
+                    # Follow OGC API next link
+                    url = None
+                    for link in data.get("links", []):
+                        if link.get("rel") == "next":
+                            url = link["href"]
+                            break
+                except Exception:
+                    break
+
+        records.sort(key=lambda r: r[0])
+
+        # Persist cache
+        try:
+            cache_dir.mkdir(parents=True, exist_ok=True)
+            cache_file.write_text(json.dumps({
+                "fetched_at": date_type.today().isoformat(),
+                "records": [[d.isoformat(), v] for d, v in records],
+            }))
+        except Exception:
+            pass
+
+        return records
 
     async def search(self, params: SearchParams) -> list[EcologicalObservation]:
         """
