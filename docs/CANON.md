@@ -2,6 +2,8 @@
 
 > Draft 0.1 · 2026-11-06 · Christine Su with Claude
 > Status: proposal. Read alongside STRATEGY.md and ROADMAP.md; this document changes both.
+>
+> **Updated 2026-11-12 — read docs/DIRECTION.md first.** Three things changed after this was written: (1) entries are *patterns*, not laws — each records where it holds and how that is drifting; (2) the canon is the tested evidence behind the existing baseline → anomaly → event pipeline, not a separate library; (3) watershed work (specs 015–016) now comes before the canon schema and the Taylor check, which are specs 017–018. Spec numbers in the table below are renumbered in docs/DIRECTION.md.
 
 ## One sentence
 
@@ -181,7 +183,7 @@ Taylor's power law on NEON breeding-landbird point counts (DP1.10003.001).
 
 Why this one: no API key, research-grade standardized sampling, needs only counts, the law is well-attested so a failure means a bug not a discovery, and it carries a clean cross-field edge. It is small enough to finish in one evening and big enough to force every piece of the pipeline to exist: node file, check runner, CI, graph edge, MCP tool.
 
-Steps (this becomes spec 016):
+Steps (this is spec 018):
 1. Pull a season of point counts for ~10 NEON sites via the existing adapter.
 2. For each species with ≥ 20 samples, compute mean and variance of counts across points.
 3. Fit log Var = log a + b · log mean (OLS, with bootstrap CI on b).

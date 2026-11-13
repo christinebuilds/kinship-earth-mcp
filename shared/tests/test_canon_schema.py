@@ -76,9 +76,11 @@ def test_invalid_id_and_edge_type_rejected():
     meta = _fixture_meta()
     with pytest.raises(ValueError):
         CanonNode(**{**meta, "id": "Example_Law"})
-    bad_edges = [{"to": "example-stub", "type": "INFORMS"}]
+    bad_edges = [{"to": "example-stub", "type": "RELATED_TO"}]
     with pytest.raises(ValueError):
         CanonNode(**{**meta, "edges": bad_edges})
+    ok_edges = [{"to": "example-stub", "type": "INFORMS"}]
+    assert CanonNode(**{**meta, "edges": ok_edges}).edges[0].type == "INFORMS"
 
 
 @pytest.mark.asyncio

@@ -202,16 +202,37 @@ Existing search results get re-ranked based on graph context.
 
 ---
 
-## Phase 6 — The Kinship Canon
+## Phase 6 — "Is this normal for here?" (added 2026-11-12)
 
-> Design: `docs/CANON.md`. One node per known ecological pattern, with
-> evidence, regime, and an executable check against the federation.
+**Goal:** Make the Phase 5 pipeline trustworthy and publish how often it is right, starting with rivers and watersheds. See `docs/DIRECTION.md`.
 
-### Milestone 6.1 — Canon Foundation
-- [x] Canon schema, loader, `pattern` entity + 9 evidential edge types, validator CLI (spec 015) ✅ 2026-11-12
-- [ ] First node end to end: Taylor's power law on NEON landbird counts (spec 016)
-- [ ] Canon MCP tools: list / get / neighbors / check / propose (spec 017)
-- [ ] CI validation + contributing guide for node/evidence/edge PRs (spec 018)
+**Dependency:** Phase 5
+
+### Milestone 6.1 — Honest baselines (spec 015)
+- [ ] Per-gauge day-of-year flow record, no pooling across gauges
+- [ ] 30-year climate normals with trend per decade
+- [ ] Percentile-based flow anomalies
+
+### Milestone 6.2 — Scorecard (spec 016)
+- [ ] Sourced reference list of documented flow events
+- [ ] No-look-ahead replay over past decades
+- [ ] Published hit rate, lead time and unmatched episodes
+
+### Milestone 6.3 — Pattern library (specs 017–018, 020–021)
+- [x] Pattern file format, validator, graph extension (spec 017) ✅ 2026-11-12
+- [ ] First pattern check (Taylor's power law on NEON bird counts)
+- [ ] MCP tools for the library
+- [ ] CI and contributor guide
+
+### Milestone 6.4 — Satellite base layer (spec 019)
+- [ ] Source cards: live greenness, Rangeland Analysis Platform, AlphaEarth embeddings, snowpack
+- [ ] First greenness adapter
+
+### Phase 6 Definition of Done
+- "Normal" means the place's own long record for that time of year
+- A public scorecard exists for the flow detector
+- At least five patterns have running checks
+- A satellite source is federated
 
 ---
 

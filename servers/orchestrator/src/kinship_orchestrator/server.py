@@ -25,6 +25,7 @@ import os
 from typing import Literal, Optional
 
 from mcp.server.fastmcp import FastMCP
+from mcp.server.transport_security import TransportSecuritySettings
 
 from neonscience_mcp.adapter import NeonAdapter
 from obis_mcp.adapter import OBISAdapter
@@ -67,6 +68,10 @@ mcp = FastMCP(
         "and their capabilities. These tools answer questions that no single data source "
         "can answer alone."
     ),
+    # The default would auto-enable DNS rebinding protection with a localhost-only host
+    # allowlist, which blocks Railway and any remote MCP client with HTTP 421. This server
+    # is designed to be reached remotely behind TLS-terminating infra, so disable it.
+    transport_security=TransportSecuritySettings(enable_dns_rebinding_protection=False),
 )
 
 # Initialize all adapters

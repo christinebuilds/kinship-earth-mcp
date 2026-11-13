@@ -47,6 +47,7 @@ RelationshipType = Literal[
     "ANALOG_OF",
     "TESTED_BY",
     "EVIDENCED_BY",
+    "INFORMS",
 ]
 
 CanonEdgeType = Literal[
@@ -59,6 +60,7 @@ CanonEdgeType = Literal[
     "ANALOG_OF",
     "TESTED_BY",
     "EVIDENCED_BY",
+    "INFORMS",
 ]
 
 

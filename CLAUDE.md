@@ -1,5 +1,19 @@
 # Kinship Earth MCP — Development Notes
 
+## Direction — read first (updated 2026-11-12)
+
+**Read `docs/DIRECTION.md` before anything else.** It records the November 2026 decisions and supersedes parts of STRATEGY.md.
+
+In short:
+- The product question is **"Is this normal for here, and what usually follows?"**, answered from open data, with a published record of how often the answer has been right.
+- **Non-commercial.** No pricing or tier work.
+- **Patterns, not laws.** Track where each pattern holds and how it is drifting.
+- **First use case: rivers and watersheds.** Fix the baselines (spec 015), then replay history and publish a scorecard (spec 016). The canon schema and first pattern check follow (017, 018).
+- **Data must be easy to get at scale:** satellite, open sightings, public science databases. Satellite is the first new source to scout.
+- Users in mind: cities planning for El Niño winters, rural fire districts in Northern California, grassfed ranchers, Point Blue Conservation Science, and scientists without sensor or compute budgets.
+
+When talking with Christine: plain language, bottom line first, one question at a time. She built PastureMap for 8 years and knows ranching and rancher data well.
+
 ## Session Ritual (TPM / Chief of Staff)
 - **Start of session:** Review progress against ROADMAP.md and specs/QUEUE.md. Report: what phase/milestone we're in, what's on track, what's at risk, what's blocked. Present the **Decisions Needed** list below. Keep us accountable against the timeline.
 - **During session:** Track deliverables against milestone checklists. Flag scope creep or distractions.
@@ -9,7 +23,14 @@
 
 These decisions are blocking or will soon block autonomous progress. Review and decide at your convenience — I'll incorporate your answers into the next specs.
 
-### P0 — Blocking Next Specs
+### P0 — Direction (added 2026-11-12)
+
+A. **Which watershed first?** Default is the Russian River (the code already names it). Not yet confirmed.
+B. **Two domain reviewers.** A pattern cannot be marked `supported` without a human reviewer. Point Blue is the first place to ask.
+C. **Rewrite STRATEGY.md in full?** It carries a "superseded" banner for now.
+D. **Merge `claude/canon-foundation` into `main`.** It holds docs/DIRECTION.md, docs/CANON.md and specs 015–018.
+
+### P0 — Blocking Next Specs (from April; items 1–3 are decided, see "Decided" below)
 
 1. **Auth provider: Supabase vs Auth0 vs Clerk?**
    - Web app used Supabase. Stick with it for consistency, or switch?
@@ -78,7 +99,7 @@ When starting an autonomous session (no human present):
 - Do NOT skip queued (unwritten) specs — stop and flag
 
 ### Branch strategy:
-- Work on branch `claude/mcp-chat-integration-8Tpu4`
+- Work on branch `claude/canon-foundation` until Christine merges it into `main`; after that, branch from `main`. (The older `claude/mcp-chat-integration-8Tpu4` branch is behind `main` and does not have specs 015+.)
 - Push after each spec completion
 - Do not create PRs autonomously — the human will review and merge
 
@@ -93,10 +114,13 @@ When starting an autonomous session (no human present):
 - Auth: `servers/orchestrator/src/kinship_orchestrator/auth*.py`
 
 ## Key Docs
-- `STRATEGY.md` — Vision, architecture, competitive moat, key decisions
+- `docs/DIRECTION.md` — **Current direction and decisions (Nov 2026). Read first.**
+- `docs/CANON.md` — The pattern library: file format, seed list, collaboration model
+- `docs/game-concept.md` — Children's game concept (for fun, not scheduled)
+- `STRATEGY.md` — Architecture and federation (moat and pricing sections superseded)
 - `ROADMAP.md` — 5-phase plan with milestones and checklists
 - `specs/QUEUE.md` — Ordered spec queue for autonomous sessions
-- `specs/001-*.md` through `specs/007-*.md` — Detailed build specs
+- `specs/001-*.md` through `specs/018-*.md` — Detailed build specs
 
 ## Testing
 ```bash
@@ -107,7 +131,15 @@ uv run --package kinship-orchestrator pytest servers/ shared/tests/ -v
 uv run --package kinship-orchestrator pytest servers/orchestrator/tests/ shared/tests/ -v -k "not (climate or dolphin or cetac or wind_river or woods_hole or parallel or cross_persona or marine or reachable or coordinates or geographic or bird_survey or bird_data or catalog or nonexistent or empty_area or bogus)"
 ```
 
-## Current Status (Updated 2026-04-15)
+## Current Status (Updated 2026-11-12)
+
+### November 2026
+- Phase 5 complete through 5.4 (Movebank and FLUXNET adapters landed 2026-11-05; 11 sources federated)
+- Direction reset recorded in `docs/DIRECTION.md`
+- Phase 6 specs 015–018 written and `ready`; none built yet
+- Known weaknesses to fix first: streamflow baseline is the last 30 days pooled across gauges; climate baseline is 5 years; flow anomalies use percent-of-mean; event rules and analogs are hand-written and unscored
+
+### Earlier status (as of 2026-04-15)
 
 ### Completed
 - Phase 1: 9-source federation (DONE)
@@ -126,6 +158,7 @@ uv run --package kinship-orchestrator pytest servers/orchestrator/tests/ shared/
 - Web app stays as demo client, points at service/ API
 - Supabase for auth
 - Opt-in shared memory, per-user by default
+- Non-commercial (2026-11-12): no pricing tiers; BYOK only so users can cover their own API costs
 
 ### Server Stats
 - **17 tools**, **4 prompts**, **1 resource**

@@ -31,10 +31,13 @@
 | 12 | `012-anomaly-detection.md` | done | 2026-05-13 | 2026-05-11 | Phase 5.2 |
 | 13 | `013-event-synthesis.md` | done | 2026-05-14 | 2026-10-31 | Phase 5.3 |
 | 14 | `014-new-data-sources.md` | done | 2026-05-15 | 2026-11-05 | Phase 5.4 |
-| 15 | `015-canon-schema.md` | done | 2026-11-08 | 2026-11-12 | Phase 6 — Canon (docs/CANON.md) |
-| 16 | `016-first-node-taylor.md` | ready | 2026-11-09 | | Phase 6 — depends on 015. Node draft uses edge type `INFORMS`, not in the schema: see Decisions inbox |
-| 17 | `017-canon-mcp-tools.md` | queued | | | canon_list/get/neighbors/check/propose |
-| 18 | `018-canon-ci-and-contributing.md` | queued | | | CI validation + node/evidence/edge PR guide |
+| 15 | `015-honest-baselines.md` | ready | 2026-11-13 | | Phase 6 — per-gauge day-of-year flow record, 30-yr climate normals (docs/DIRECTION.md) |
+| 16 | `016-history-replay-scorecard.md` | ready | 2026-11-14 | | Phase 6 — depends on 015; needs web search for event sources |
+| 17 | `017-canon-schema.md` | done | 2026-11-15 | 2026-11-12 | Phase 6 — pattern files + graph extension (docs/CANON.md). Built early under old number 015; INFORMS edge type added 2026-11-13 |
+| 18 | `018-first-node-taylor.md` | ready | 2026-11-16 | | Phase 6 — depends on 017 |
+| 19 | `019-satellite-source-cards.md` | queued | | | Source cards + first greenness adapter |
+| 20 | `020-canon-mcp-tools.md` | queued | | | canon_list/get/neighbors/check/propose |
+| 21 | `021-canon-ci-and-contributing.md` | queued | | | CI validation + pattern/evidence/edge PR guide |
 
 ### Status Key
 - `ready` — spec is written, detailed, and executable autonomously
@@ -45,9 +48,9 @@
 
 ## Inventory
 
-- **Specs ready:** 1
-- **Specs queued (need writing):** 2
+- **Specs ready:** 3
+- **Specs queued (need writing):** 3
 - **Specs done:** 15
-- **Buffer:** 1 spec ready — 017/018 need writing
+- **Buffer:** 3 specs ready — write 019 after 016 lands
 
 > When buffer drops to 2 or fewer, the next interactive session should prioritize writing more specs.
