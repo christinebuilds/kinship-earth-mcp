@@ -15,8 +15,8 @@ San Francisco. This branch is `main` (through PR #16) plus the runner's work:
 ## Blocked: network
 The runner's cloud environment (Default) refuses every data API. Needed:
 `api.waterdata.usgs.gov`, `archive-api.open-meteo.com` (015, 016) and
-`data.neonscience.org` (018). Christine approved in the Radar on 2026-11-13; the
-environment prompt itself is still unanswered. Until a host allowlist exists, 015's
+`data.neonscience.org` (018). The `kinship-earth-mcp` environment allows them, but this
+session is still on Default. Until a host allowlist exists, 015's
 remaining half, 016 and 018 cannot run.
 
 ## Next up (no decision needed)
@@ -33,9 +33,10 @@ remaining half, 016 and 018 cannot run.
 
 ## Waiting on Christine
 Project Radar (https://claude.ai/artifact/4e5P3qeCmC1rctQUrn651Q):
-- Network: she said yes. It still needs her tap on the environment approval
-  prompt (shown at the end of each wake until answered), or the three hosts
-  added in the environment's settings.
+- Network: environment `kinship-earth-mcp` now exists with the three data
+  hosts (approved 2026-11-13), but this runner session cannot move onto it.
+  The runner needs to be restarted on that environment (new session or the
+  wake routine pointed at it); until then the hosts stay blocked here.
 - PR #17 (bug tracking): she said merge, but GitHub blocks it — its `test`
   check was cancelled at 15 minutes. Needs a green re-run by the PR's author
   session before the runner merges.
