@@ -33,6 +33,7 @@ logger = logging.getLogger(__name__)
 REPO = os.environ.get("KINSHIP_ISSUES_REPO", "christinebuilds/kinship-earth-mcp")
 API = "https://api.github.com"
 CHAT_LABELS = ["bug", "from-chat"]
+GAP_LABELS = ["data-gap", "from-chat"]
 AUTO_LABELS = ["bug", "auto-reported"]
 _REPEAT_COMMENT_SECONDS = 24 * 3600
 _last_comment: dict[str, float] = {}
@@ -107,7 +108,7 @@ async def file_issue(title: str, body: str, sig: str, labels: list[str]) -> dict
         return {"status": "failed"}
 
 
-async def report_problem(summary: str, what_happened: str, expected: str = "", tool_name: str = "") -> dict:
+async def report_problem(summary: str, what_happened: str, expected: str = "", tool_name: str = "", kind: str = "bug") -> dict:
     summary = coarsen(summary.strip())
     body = (
         "Reported from a Kinship Earth chat.\n\n"
@@ -115,6 +116,9 @@ async def report_problem(summary: str, what_happened: str, expected: str = "", t
         + (f"**Expected:** {coarsen(expected.strip())}\n\n" if expected.strip() else "")
         + (f"**Tool:** `{tool_name}`\n" if tool_name else "")
     )
+    if kind == "data_gap":
+        return await file_issue(f"[data gap] {summary}", body.replace("**What happened:**", "**Asked for:**"),
+                                signature("gap", summary), GAP_LABELS)
     return await file_issue(f"[chat] {summary}", body, signature("chat", tool_name, summary), CHAT_LABELS)
 
 

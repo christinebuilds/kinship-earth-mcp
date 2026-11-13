@@ -1422,9 +1422,15 @@ async def ecology_report_problem(
     what_happened: str,
     expected: str = "",
     tool_name: str = "",
+    kind: Literal["bug", "data_gap"] = "bug",
 ) -> dict:
     """
-    Report a problem with Kinship Earth so it gets tracked and fixed.
+    Report a problem, or data Kinship Earth doesn't have, so it gets fixed.
+
+    Use kind="data_gap" when the person asks for something the tools cannot
+    answer (for example a flood outlook, tides, or a species range): summary
+    names the missing capability, what_happened says what was asked for, and
+    expected says what data or tool would answer it.
 
     Call this when the person says a result is wrong, missing or broken, or
     when you notice a tool gave an answer that cannot be right (a bird far out
@@ -1440,10 +1446,11 @@ async def ecology_report_problem(
         what_happened: What the tool returned or did.
         expected: What should have happened, if known.
         tool_name: The Kinship Earth tool involved, if any.
+        kind: "bug" for something broken or wrong, "data_gap" for missing data.
     """
     from .problem_reports import report_problem
 
-    return await report_problem(summary, what_happened, expected, tool_name)
+    return await report_problem(summary, what_happened, expected, tool_name, kind)
 
 
 # ---------------------------------------------------------------------------

@@ -91,3 +91,10 @@ def test_server_wraps_tools_and_exposes_report_tool():
     tools = mcp._tool_manager._tools
     assert "ecology_report_problem" in tools
     assert tools["ecology_search"].fn.__wrapped__ is not None
+
+
+def test_data_gap_gets_its_own_label(github):
+    result = asyncio.run(pr.report_problem("no flood outlook", "flood map for 2 inches of rain", kind="data_gap"))
+    assert result["status"] == "filed"
+    assert github["issues"][0]["labels"] == ["data-gap", "from-chat"]
+    assert github["issues"][0]["title"].startswith("[data gap]")

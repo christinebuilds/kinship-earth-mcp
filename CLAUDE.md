@@ -116,6 +116,13 @@ them at the start of every run, before specs:
 
 Never merge a fix without that answer.
 
+Issues labeled `data-gap` are product requests, not bugs: Christine asked for
+something the tools could not answer. Treat them as a PM would: find the open
+data that would answer it, write a spec for it in `specs/` (status `ready` in
+QUEUE.md if it fits docs/DIRECTION.md, otherwise `queued`), link the issue,
+and file a Project Radar decision asking whether to queue it. Close the issue
+when the spec ships.
+
 ### If a spec is blocked:
 - Mark it as `blocked` in QUEUE.md with a note explaining why
 - Move to the next `ready` spec
