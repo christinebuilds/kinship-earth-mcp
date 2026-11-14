@@ -128,6 +128,8 @@ These combine multiple data sources in a single answer:
 | `ecology_whats_changed` | What arrived, left or shifted near a place in the last two weeks, compared with last year |
 | `ecology_describe_sources` | What data sources are available and their capabilities |
 
+**What "normal" means.** River flow is compared with one nearby USGS gauge's own daily record for the same two weeks of the year, over every year the gauge has measured (often 50 to 85 years), and reported as a percentile that names the gauge and the record length. Climate normals are the 30 years before this one for the same time of year, with the warming or cooling trend per decade reported alongside.
+
 You can also run individual data source servers for more granular access:
 
 | Server | Tools | Data |

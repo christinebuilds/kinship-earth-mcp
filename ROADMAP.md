@@ -209,9 +209,9 @@ Existing search results get re-ranked based on graph context.
 **Dependency:** Phase 5
 
 ### Milestone 6.1 — Honest baselines (spec 015)
-- [ ] Per-gauge day-of-year flow record, no pooling across gauges
-- [ ] 30-year climate normals with trend per decade
-- [x] Percentile-based flow anomalies (detector + climatology functions; wiring to live gauges pending) ✅ 2026-11-13
+- [x] Per-gauge day-of-year flow record, no pooling across gauges ✅ 2026-11-14
+- [x] 30-year climate normals with trend per decade ✅ 2026-11-14
+- [x] Percentile-based flow anomalies (wired to live gauges 2026-11-14) ✅ 2026-11-13
 
 ### Milestone 6.2 — Scorecard (spec 016)
 - [ ] Sourced reference list of documented flow events

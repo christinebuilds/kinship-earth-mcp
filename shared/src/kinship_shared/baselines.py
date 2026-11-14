@@ -30,6 +30,11 @@ class BaselineValues(BaseModel):
     streamflow_mean_cfs: Optional[float] = None
     streamflow_std_cfs: Optional[float] = None
 
+    temp_trend_c_per_decade: Optional[float] = Field(
+        default=None, description="OLS slope of the yearly window-mean temperatures"
+    )
+    baseline_period: Optional[str] = Field(default=None, description="e.g. '1996–2025'")
+
     species_richness_mean: Optional[int] = None
     ndvi_mean: Optional[float] = None
     ndvi_std: Optional[float] = None
@@ -165,50 +170,99 @@ def classify_trend(health_scores: list[float]) -> str:
     return "stable"
 
 
+def _ols_slope(xs: list[float], ys: list[float]) -> Optional[float]:
+    """Least-squares slope of ys on xs; None with fewer than 3 points."""
+    n = len(xs)
+    if n < 3:
+        return None
+    mx, my = sum(xs) / n, sum(ys) / n
+    sxx = sum((x - mx) ** 2 for x in xs)
+    if sxx == 0:
+        return None
+    return sum((x - mx) * (y - my) for x, y in zip(xs, ys)) / sxx
+
+
+def _std(values: list[float]) -> Optional[float]:
+    if len(values) < 2:
+        return None
+    m = sum(values) / len(values)
+    return math.sqrt(sum((v - m) ** 2 for v in values) / (len(values) - 1))
+
+
 async def compute_baselines_from_era5(
     era5_adapter,
     lat: float,
     lng: float,
     target_date: datetime,
-    years_back: int = 5,
+    years_back: int = 30,
+    window_days: int = 7,
 ) -> BaselineValues:
-    """Compute climate baselines from ERA5 historical data."""
-    from .schema import SearchParams
+    """Climate normals: ±window_days around this day-of-year over the
+    ``years_back`` years before the target year.
 
+    The Open-Meteo archive accepts a multi-decade range in one request
+    (31 years answered in under 2 s when checked 2026-11-14), so we fetch
+    once and slice by day-of-year rather than making one call per year.
+    """
     doy = target_date.timetuple().tm_yday
     location_id = f"location:{lat:.2f}_{lng:.2f}"
+    first_year = target_date.year - years_back
+    last_year = target_date.year - 1
+
+    def center(year: int) -> date:
+        return date(year, 1, 1) + timedelta(days=min(doy, 365) - 1)
+
+    start = center(first_year) - timedelta(days=window_days)
+    end = center(last_year) + timedelta(days=window_days)
+
+    baseline = BaselineValues(location_id=location_id, day_of_year=doy, years_of_data=0)
+    try:
+        era5_data = await era5_adapter.get_daily(
+            lat=lat, lng=lng, start_date=start.isoformat(), end_date=end.isoformat()
+        )
+    except Exception:
+        return baseline
+
+    daily = era5_data.get("daily", {}) if isinstance(era5_data, dict) else {}
+    times = daily.get("time") or []
+    temp_by_day = dict(zip(times, daily.get("temperature_2m_mean") or []))
+    precip_by_day = dict(zip(times, daily.get("precipitation_sum") or []))
+
     temps: list[float] = []
     precips: list[float] = []
+    yearly_temp: list[tuple[int, float]] = []
+    years_with_data: set[int] = set()
+    for year in range(first_year, last_year + 1):
+        c = center(year)
+        year_temps = []
+        for k in range(-window_days, window_days + 1):
+            key = (c + timedelta(days=k)).isoformat()
+            t = temp_by_day.get(key)
+            p = precip_by_day.get(key)
+            if t is not None:
+                year_temps.append(t)
+            if p is not None:
+                precips.append(p)
+                years_with_data.add(year)
+        if year_temps:
+            temps.extend(year_temps)
+            yearly_temp.append((year, sum(year_temps) / len(year_temps)))
+            years_with_data.add(year)
 
-    for year_offset in range(1, years_back + 1):
-        year = target_date.year - year_offset
-        center = datetime(year, 1, 1) + timedelta(days=doy - 1)
-        start = (center - timedelta(days=7)).strftime("%Y-%m-%d")
-        end = (center + timedelta(days=7)).strftime("%Y-%m-%d")
-
-        try:
-            era5_data = await era5_adapter.get_daily(lat=lat, lng=lng, start_date=start, end_date=end)
-            daily = era5_data.get("daily", {})
-            if "temperature_2m_mean" in daily:
-                temps.extend([v for v in daily["temperature_2m_mean"] if v is not None])
-            if "precipitation_sum" in daily:
-                precips.extend([v for v in daily["precipitation_sum"] if v is not None])
-        except Exception:
-            continue
-
-    baseline = BaselineValues(location_id=location_id, day_of_year=doy, years_of_data=years_back)
-
+    baseline.years_of_data = len(years_with_data)
+    if years_with_data:
+        baseline.baseline_period = f"{min(years_with_data)}–{max(years_with_data)}"
     if temps:
         baseline.temp_mean_c = round(sum(temps) / len(temps), 2)
-        if len(temps) > 1:
-            mean = baseline.temp_mean_c
-            baseline.temp_std_c = round(math.sqrt(sum((t - mean) ** 2 for t in temps) / (len(temps) - 1)), 2)
+        sd = _std(temps)
+        baseline.temp_std_c = round(sd, 2) if sd is not None else None
+        slope = _ols_slope([y for y, _ in yearly_temp], [m for _, m in yearly_temp])
+        if slope is not None:
+            baseline.temp_trend_c_per_decade = round(slope * 10, 3)
     if precips:
         baseline.precip_mean_mm = round(sum(precips) / len(precips), 2)
-        if len(precips) > 1:
-            mean = baseline.precip_mean_mm
-            baseline.precip_std_mm = round(math.sqrt(sum((p - mean) ** 2 for p in precips) / (len(precips) - 1)), 2)
-
+        sd = _std(precips)
+        baseline.precip_std_mm = round(sd, 2) if sd is not None else None
     return baseline
 
 
@@ -218,35 +272,77 @@ async def compute_baselines_from_usgs(
     lng: float,
     target_date: datetime,
     radius_km: float = 50.0,
+    current_flow: Optional[float] = None,
+    min_years: int = 10,
+    window_days: int = 7,
+    max_candidates: int = 5,
 ) -> dict:
-    """Compute streamflow baselines from nearby USGS gauges."""
-    from .schema import SearchParams
+    """Streamflow baseline from ONE gauge's own day-of-year record.
 
-    flows: list[float] = []
-    start = (target_date - timedelta(days=30)).strftime("%Y-%m-%d")
-    end = target_date.strftime("%Y-%m-%d")
+    Picks the nearest gauge whose daily discharge record spans at least
+    ``min_years`` and that still reports, and compares against that gauge
+    only. Gauges are never pooled. Returns ``{"baseline_kind":
+    "insufficient_record"}`` (and no streamflow keys) when no nearby gauge
+    has enough record; callers then skip flow anomaly detection.
+
+    Keys kept for older callers: ``streamflow_mean_cfs`` is now the
+    day-of-year median (p50) and ``streamflow_std_cfs`` the IQR / 1.349.
+    When ``current_flow`` is not given, the gauge's latest daily mean within
+    7 days of the target is used and returned as ``current_flow_cfs``.
+    """
+    insufficient = {"baseline_kind": "insufficient_record"}
+    target = target_date.date() if isinstance(target_date, datetime) else target_date
 
     try:
-        observations = await usgs_adapter.search(
-            SearchParams(lat=lat, lng=lng, radius_km=radius_km, start_date=start, end_date=end, limit=100)
-        )
-        for obs in observations:
-            if obs.value and isinstance(obs.value, dict):
-                flow = obs.value.get("discharge_cfs") or obs.value.get("value")
-                if flow is not None:
-                    try:
-                        flows.append(float(flow))
-                    except (ValueError, TypeError):
-                        continue
+        gauges = await usgs_adapter.find_discharge_gauges(lat, lng, radius_km)
     except Exception:
-        pass
+        return insufficient
 
-    result: dict = {}
-    if flows:
-        result["streamflow_mean_cfs"] = round(sum(flows) / len(flows), 2)
-        if len(flows) > 1:
-            mean = result["streamflow_mean_cfs"]
-            result["streamflow_std_cfs"] = round(
-                math.sqrt(sum((f - mean) ** 2 for f in flows) / (len(flows) - 1)), 2
+    for gauge in gauges:
+        if max_candidates <= 0:
+            break
+        span_years = (gauge["end"] - gauge["begin"]).days / 365.25
+        if span_years < min_years or (target - gauge["end"]).days > 30:
+            continue
+        max_candidates -= 1
+        try:
+            record = await usgs_adapter.get_daily_record(gauge["site_id"])
+        except Exception:
+            continue
+        clim = flow_climatology(record, target, window_days=window_days,
+                                min_years=min_years, site_id=gauge["site_id"])
+        if clim is None:
+            continue
+
+        result: dict = {
+            "baseline_kind": "doy_record",
+            "site_id": gauge["site_id"],
+            "gauge_distance_km": gauge.get("distance_km"),
+            "streamflow_mean_cfs": clim.p50,
+            "streamflow_std_cfs": round((clim.p75 - clim.p25) / 1.349, 3),
+            "climatology": clim.model_dump(mode="json"),
+        }
+
+        flow, flow_date = current_flow, None
+        if flow is None:
+            # The cached long record may be days old; fetch the recent tail.
+            recent_start = (target - timedelta(days=7)).isoformat()
+            try:
+                recent = await usgs_adapter.get_daily_record(
+                    gauge["site_id"], start_date=recent_start, end_date=target.isoformat()
+                )
+            except Exception:
+                recent = []
+            recent = recent or [(d, v) for d, v in record if 0 <= (target - d).days <= 7]
+            if recent:
+                flow_date, flow = recent[-1]
+        if flow is not None:
+            result["current_flow_cfs"] = flow
+            if flow_date is not None:
+                result["current_flow_date"] = flow_date.isoformat()
+            result["streamflow_percentile"] = flow_percentile(
+                flow, record, target, window_days=window_days
             )
-    return result
+        return result
+
+    return insufficient

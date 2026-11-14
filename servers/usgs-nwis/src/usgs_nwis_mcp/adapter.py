@@ -15,9 +15,11 @@ This is the bridge adapter for Phase 2 watershed monitoring agents.
 
 from __future__ import annotations
 
+import json
 import logging
 import os
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
+from pathlib import Path
 from math import radians, sin, cos, sqrt, atan2
 from typing import Optional
 
@@ -93,7 +95,8 @@ class USGSNWISAdapter(EcologicalAdapter):
                 "US Geological Survey water monitoring network with ~13,500 active "
                 "real-time stations measuring streamflow, gage height, water temperature, "
                 "dissolved oxygen, pH, turbidity, and more. 15-minute continuous data "
-                "and daily statistics. Coverage: all US states and territories."
+                "since 2007 and daily means back to the start of each gauge's record "
+                "(many from the 1930s-60s). Coverage: all US states and territories."
             ),
             modalities=["hydrological"],
             supports_location_search=True,
@@ -101,7 +104,9 @@ class USGSNWISAdapter(EcologicalAdapter):
             supports_date_range=True,
             supports_site_search=True,
             geographic_coverage="United States and territories",
-            temporal_coverage_start="2007-10-01",
+            # Continuous (15-minute) data starts 2007-10-01; daily means go
+            # back much further (USGS-11467000 from 1939-10-01).
+            temporal_coverage_start="1939-10-01",
             update_frequency="real-time",
             quality_tier=1,
             requires_auth=False,
@@ -109,6 +114,9 @@ class USGSNWISAdapter(EcologicalAdapter):
             license="public-domain",
             homepage_url="https://waterdata.usgs.gov/",
         )
+
+    cache_dir: Path = Path.home() / ".kinship-earth" / "cache" / "usgs-daily"
+    cache_max_age_days: int = 7
 
     def _headers(self) -> dict:
         headers = {}
@@ -171,6 +179,148 @@ class USGSNWISAdapter(EcologicalAdapter):
 
         sites.sort(key=lambda f: f.get("_distance_km", 999))
         return sites
+
+    async def find_discharge_gauges(
+        self, lat: float, lng: float, radius_km: float = 50.0,
+        parameter_code: str = "00060",
+    ) -> list[dict]:
+        """Gauges near a point that have a daily-mean record for a parameter.
+
+        Uses the time-series-metadata collection, which lists each daily
+        series with its begin and end dates, so gauges without a discharge
+        record (wells, one-off sampling sites) are never fetched.
+        Returns dicts with site_id, lat, lng, distance_km, begin, end
+        (dates), nearest first.
+        """
+        bbox = _radius_to_bbox(lat, lng, radius_km)
+        async with httpx.AsyncClient(timeout=60, headers=self._headers()) as client:
+            resp = await http_get_with_retry(
+                client,
+                f"{BASE_URL}/collections/time-series-metadata/items",
+                params={
+                    "bbox": bbox, "parameter_code": parameter_code,
+                    "statistic_id": "00003", "limit": 1000, "f": "json",
+                },
+            )
+        if resp.status_code != 200:
+            return []
+        gauges: dict[str, dict] = {}
+        for feature in resp.json().get("features", []):
+            props = feature.get("properties", {})
+            geom = feature.get("geometry") or {}
+            coords = geom.get("coordinates")
+            site_id = props.get("monitoring_location_id")
+            if not site_id or not coords or not props.get("begin") or not props.get("end"):
+                continue
+            g_lng, g_lat = coords[:2]
+            dist = _haversine_km(lat, lng, g_lat, g_lng)
+            if dist > radius_km:
+                continue
+            begin = date.fromisoformat(props["begin"][:10])
+            end = date.fromisoformat(props["end"][:10])
+            prev = gauges.get(site_id)
+            if prev:  # several series at one gauge: keep the widest span
+                begin, end = min(begin, prev["begin"]), max(end, prev["end"])
+            gauges[site_id] = {
+                "site_id": site_id, "lat": g_lat, "lng": g_lng,
+                "distance_km": round(dist, 2), "begin": begin, "end": end,
+            }
+        return sorted(gauges.values(), key=lambda g: g["distance_km"])
+
+    def _cache_path(self, site_id: str, parameter_code: str) -> Path:
+        return self.cache_dir / f"{site_id}_{parameter_code}.json"
+
+    def _read_cache(self, site_id: str, parameter_code: str) -> list[tuple[date, float]] | None:
+        path = self._cache_path(site_id, parameter_code)
+        try:
+            data = json.loads(path.read_text())
+            fetched = date.fromisoformat(data["fetched"])
+            if (date.today() - fetched).days >= self.cache_max_age_days:
+                return None
+            return [(date.fromisoformat(d), float(v)) for d, v in data["record"]]
+        except (OSError, ValueError, KeyError, TypeError):
+            return None
+
+    def _write_cache(self, site_id: str, parameter_code: str, record: list[tuple[date, float]]) -> None:
+        path = self._cache_path(site_id, parameter_code)
+        try:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(json.dumps({
+                "fetched": date.today().isoformat(),
+                "record": [[d.isoformat(), v] for d, v in record],
+            }))
+        except OSError as e:
+            logger.warning("Could not write USGS daily cache %s: %s", path, e)
+
+    async def get_daily_record(
+        self, site_id: str, parameter_code: str = "00060",
+        start_date: str | None = None, end_date: str | None = None,
+    ) -> list[tuple[date, float]]:
+        """Full daily-mean record for one monitoring location, oldest first.
+
+        What the live API does (probed 2026-11-14 on USGS-11467000, Russian
+        River near Guerneville):
+        - collections/daily/items accepts limit=10000 per page and pages
+          with a "next" link (offset-based). Follow the link until absent.
+        - Rows come back unsorted. sortby=time works on the first page only
+          (later pages answer 400 "Only the first page of data can be
+          returned when specifying 'sortby'"), so we never pass it and sort
+          locally instead.
+        - The daily record for that gauge starts 1939-10-01, far earlier
+          than the continuous data (2007).
+        The full record (no start/end) is cached on disk for 7 days.
+        """
+        if not site_id.startswith("USGS-"):
+            site_id = f"USGS-{site_id}"
+        full = start_date is None and end_date is None
+        if full:
+            cached = self._read_cache(site_id, parameter_code)
+            if cached is not None:
+                return cached
+
+        params: dict = {
+            "monitoring_location_id": site_id,
+            "parameter_code": parameter_code,
+            "statistic_id": "00003",
+            "limit": 10000,
+            "properties": "time,value",
+            "f": "json",
+        }
+        if start_date or end_date:
+            params["datetime"] = f"{start_date or '..'}/{end_date or '..'}"
+
+        by_day: dict[date, float] = {}
+        url: str | None = f"{BASE_URL}/collections/daily/items"
+        complete = True
+        async with httpx.AsyncClient(timeout=120, headers=self._headers()) as client:
+            pages = 0
+            while url and pages < 50:
+                resp = await http_get_with_retry(client, url, params=params)
+                if resp.status_code != 200:
+                    logger.warning("USGS daily %s page %d: HTTP %d", site_id, pages, resp.status_code)
+                    complete = False
+                    break
+                data = resp.json()
+                for feature in data.get("features", []):
+                    props = feature.get("properties", {})
+                    t, v = props.get("time"), props.get("value")
+                    if not t or v in (None, "", "-999999", "-999999.00"):
+                        continue
+                    try:
+                        by_day.setdefault(date.fromisoformat(t[:10]), float(v))
+                    except (ValueError, TypeError):
+                        continue
+                url = next(
+                    (l.get("href") for l in data.get("links", []) if l.get("rel") == "next"),
+                    None,
+                )
+                params = None  # the next link carries the full query
+                pages += 1
+
+        record = sorted(by_day.items())
+        if full and record and complete and url is None:
+            self._write_cache(site_id, parameter_code, record)
+        return record
 
     async def search(self, params: SearchParams) -> list[EcologicalObservation]:
         """

@@ -30,7 +30,7 @@ async def build_ecosystem_state(
     ebird_adapter=None,
     gbif_adapter=None,
     period_days: int = 30,
-    baseline_years: int = 5,
+    baseline_years: int = 30,
     recent_health_scores: list[float] | None = None,
 ) -> EcosystemState:
     """Build a current EcosystemState for a location."""
@@ -58,24 +58,15 @@ async def build_ecosystem_state(
     except Exception as e:
         logger.warning("ERA5 query failed for %s: %s", site_id, e)
 
-    # 2. USGS hydrology
+    # 2. USGS hydrology: current flow and its baseline come from ONE gauge,
+    # the nearest with a long daily record (spec 015). No pooling.
+    usgs_baseline: dict = {}
     try:
-        usgs_obs = await usgs_adapter.search(
-            SearchParams(lat=location.lat, lng=location.lng, radius_km=50.0,
-                         start_date=(now - timedelta(days=7)).strftime("%Y-%m-%d"),
-                         end_date=end_date, limit=20)
+        usgs_baseline = await compute_baselines_from_usgs(
+            usgs_adapter, location.lat, location.lng, now
         )
-        flows = []
-        for obs in usgs_obs:
-            if obs.value and isinstance(obs.value, dict):
-                flow = obs.value.get("discharge_cfs") or obs.value.get("value")
-                if flow is not None:
-                    try:
-                        flows.append(float(flow))
-                    except (ValueError, TypeError):
-                        continue
-        if flows:
-            streamflow = round(sum(flows) / len(flows), 2)
+        streamflow = usgs_baseline.get("current_flow_cfs")
+        if streamflow is not None:
             sources.append("usgs-nwis")
     except Exception as e:
         logger.warning("USGS query failed for %s: %s", site_id, e)
@@ -98,7 +89,6 @@ async def build_ecosystem_state(
 
     # 4. Baselines
     baseline = await compute_baselines_from_era5(era5_adapter, location.lat, location.lng, now, years_back=baseline_years)
-    usgs_baseline = await compute_baselines_from_usgs(usgs_adapter, location.lat, location.lng, now)
 
     # 5. Deviations
     deviations = []
@@ -128,6 +118,10 @@ async def build_ecosystem_state(
         period_days=period_days,
         streamflow_cfs=streamflow,
         streamflow_baseline=streamflow_baseline,
+        streamflow_percentile=usgs_baseline.get("streamflow_percentile"),
+        streamflow_baseline_kind=usgs_baseline.get("baseline_kind"),
+        streamflow_site_id=usgs_baseline.get("site_id"),
+        streamflow_record_years=(usgs_baseline.get("climatology") or {}).get("years_of_data"),
         precipitation_7d_mm=precip_7d,
         species_richness=species_richness,
         species_baseline=baseline.species_richness_mean,

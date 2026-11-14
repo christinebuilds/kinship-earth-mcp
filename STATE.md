@@ -1,65 +1,58 @@
 # STATE — Kinship Earth MCP
 
-_Last updated: 2026-11-14 by Claude (runner wake 4)_
+_Last updated: 2026-11-14 by Claude (runner wake 6)_
 
 ## Where we are
 Direction: `docs/DIRECTION.md` (read first). "Is this normal for here, and
-what usually follows?", rivers first: Russian River plus Mission Creek in
-San Francisco. This branch is `main` (through PR #16) plus the runner's work:
-- Spec 017 (pattern schema, loader, graph extension) done, with `INFORMS`
-  added as a tenth edge type.
-- Spec 015 (honest baselines) half done: `FlowClimatology`,
-  `flow_climatology`, `flow_percentile`, percentile-based `FlowDetector`,
-  new `EcosystemState` fields, 9 offline tests.
-- Spec 022 done: `ecology_whats_changed` (arrivals and departures near
-  home), tested with faked adapters only.
-
-## Blocked: network
-The runner's cloud environment (Default) refuses every data API. Needed:
-`api.waterdata.usgs.gov`, `archive-api.open-meteo.com` (015, 016) and
-`data.neonscience.org` (018). The `kinship-earth-mcp` environment allows them, but this
-session is still on Default. Until a host allowlist exists, 015's
-remaining half, 016 and 018 cannot run.
+what usually follows?", rivers first: Russian River plus Mission Creek.
+This runner session can now push, read GitHub issues, and reach USGS,
+Open-Meteo archive and NEON. `api.inaturalist.org` is still refused.
+- Spec 015 (honest baselines) **done**. Flow is compared with one gauge's
+  own day-of-year record. Live: Russian River at Guerneville (USGS-11467000),
+  87 years, 179 cfs vs median 307 = 13th percentile, no anomaly. Climate
+  normals cover 30 years (1996–2025) and report a trend.
+- Specs 017 and 022 done earlier.
 
 ## Next up (no decision needed)
 1. Each wake, first: triage open `bug` issues without `fix-ready` (none on
    2026-11-14).
-2. If the network allows: finish spec 015 — USGS `get_daily_record` (probe
-   paging live first), single-gauge `compute_baselines_from_usgs`, 30-year
-   ERA5 normals with trend, `state_builder` wiring, README sentences. Then
-   try `ecology_whats_changed` once against live iNaturalist.
-3. Otherwise: issue #18 (`data-gap`: neighborhood flood outlook) — find the
-   open data, write a spec, file a Radar decision on whether to queue it.
-4. Write specs 019–021 (satellite source cards, canon MCP tools, canon CI).
-5. Specs 016 and 018 after 015 and network.
+2. Spec 016 (history replay + scorecard): `ready`. It needs a sourced list
+   of past Russian River flow events (web search), then a no-look-ahead
+   replay using `get_daily_record` (cached, so replay is cheap).
+3. Spec 018 (Taylor's power law on NEON bird counts): `ready`, NEON reachable.
+4. Issue #18 (`data-gap`: neighborhood flood outlook): find the open data,
+   write a spec, file a Radar decision on whether to queue it.
+5. Write specs 019–021 (satellite source cards, canon MCP tools, canon CI).
+   Spec buffer is low: 2 ready.
 
 ## Waiting on Christine
 Project Radar (https://claude.ai/artifact/4e5P3qeCmC1rctQUrn651Q):
-- Network: marked done in the Radar, but on 2026-11-14 the runner session
-  is still on Default and every data host is refused. The wake still lands
-  in this old session, which cannot be moved. It needs a new session on
-  `kinship-earth-mcp` with the wake routine pointed at that session.
-  `api.inaturalist.org` should be added to that environment too.
-- PR #17 (bug tracking): she said merge, but GitHub blocks it — its `test`
-  check was cancelled at 15 minutes. Needs a green re-run by the PR's author
-  session before the runner merges.
+- **Mission Creek gauge** (new): no USGS gauge in SF. Say "no gauge",
+  use the nearest (a Marin creek 20 km away), or same watershed only?
+  Until answered, the code uses the nearest gauge within 50 km with ≥10 years.
+- PR #17 (bug tracking): she said merge, but its `test` check is still
+  cancelled (checked 2026-11-14). Needs a green re-run by its author session.
 - Add a GitHub token on Railway (her action).
+- `api.inaturalist.org` on this environment's allowlist, so
+  `ecology_whats_changed` can be tried live.
 
 ## Found along the way
-- `state_builder` and the old USGS baseline read `value["discharge_cfs"]`,
-  but the adapter writes `value["measurement"]`, so streamflow has been
-  silently empty. Fix belongs in the rest of spec 015.
-- Mission Creek is mostly culverted; it may have no USGS gauge. Check live.
-- 7 tests in the "offline" command call live APIs and fail here.
+- USGS daily API: `sortby` works on the first page only (later pages 400);
+  sort locally. `time-series-metadata` lists each gauge's daily record with
+  begin/end dates, the cheap way to pick a gauge.
+- The old `discharge_cfs` key bug is gone: flow now comes from the gauge's
+  daily record, not a pooled search that mixed in water temperature.
+- 3 tests in the "offline" command fail here because OBIS and iNaturalist
+  answer 403; same before and after spec 015.
 - `EcologicalGraph` keeps one edge per node pair.
-- Christine is the first pattern reviewer (her answer, 2026-11-13).
 
 ## Recently done
+- 2026-11-14 — Spec 015 finished (live gauges, 30-yr normals); network Radar row applied
 - 2026-11-14 — Spec 022 built: `ecology_whats_changed`
-- 2026-11-13 — Spec 022 written (neighborhood companion)
 - 2026-11-13 — Merged main; INFORMS edge; offline half of spec 015
 
 ## How to resume
 - Protocol: `CLAUDE.md`; queue: `specs/QUEUE.md`. Decisions: Project Radar.
 - Offline tests: the `-k "not (...)"` command under Testing in `CLAUDE.md`.
+  Live tests are marked `@pytest.mark.network`.
 - Runner branch: `claude/runner-kinship-earth`. Never push to main.

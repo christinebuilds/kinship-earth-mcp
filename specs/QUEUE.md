@@ -31,10 +31,10 @@
 | 12 | `012-anomaly-detection.md` | done | 2026-05-13 | 2026-05-11 | Phase 5.2 |
 | 13 | `013-event-synthesis.md` | done | 2026-05-14 | 2026-10-31 | Phase 5.3 |
 | 14 | `014-new-data-sources.md` | done | 2026-05-15 | 2026-11-05 | Phase 5.4 |
-| 15 | `015-honest-baselines.md` | blocked | 2026-11-13 | | Phase 6. Offline half done 2026-11-13 (FlowClimatology, flow_percentile, percentile FlowDetector, tests). Blocked: the runner's network refuses api.waterdata.usgs.gov and archive-api.open-meteo.com, and the spec requires live calls before building the adapter paging and 30-yr normals |
-| 16 | `016-history-replay-scorecard.md` | blocked | 2026-11-14 | | Phase 6 — depends on 015; needs web search for event sources and live USGS data |
+| 15 | `015-honest-baselines.md` | done | 2026-11-13 | 2026-11-14 | Phase 6. Per-gauge day-of-year flow record (USGS daily paging + 7-day disk cache, gauge chosen from time-series-metadata), 30-yr ERA5 normals in one call with trend, state_builder wired, README note. Live: Russian River at Guerneville, 87 years of record. Mission Creek has no gauge (Radar decision filed) |
+| 16 | `016-history-replay-scorecard.md` | ready | 2026-11-14 | | Phase 6 — 015 done; USGS reachable from the runner. Needs web search for event sources |
 | 17 | `017-canon-schema.md` | done | 2026-11-15 | 2026-11-12 | Phase 6 — pattern files + graph extension (docs/CANON.md). Built early under old number 015; INFORMS edge type added 2026-11-13 |
-| 18 | `018-first-node-taylor.md` | blocked | 2026-11-16 | | Phase 6 — depends on 017 (done). Blocked: needs live data.neonscience.org, refused by the runner's network |
+| 18 | `018-first-node-taylor.md` | ready | 2026-11-16 | | Phase 6 — depends on 017 (done). data.neonscience.org reachable from the runner since 2026-11-14 |
 | 19 | `019-satellite-source-cards.md` | queued | | | Source cards + first greenness adapter |
 | 22 | `022-neighborhood-companion.md` | done | 2026-11-14 | 2026-11-14 | Alongside river work: `ecology_whats_changed`, arrivals and departures near home. Not yet tried against live iNaturalist (host blocked for the runner) |
 | 20 | `020-canon-mcp-tools.md` | queued | | | canon_list/get/neighbors/check/propose |
