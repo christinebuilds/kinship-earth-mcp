@@ -228,6 +228,9 @@ Existing search results get re-ranked based on graph context.
 - [ ] Source cards: live greenness, Rangeland Analysis Platform, AlphaEarth embeddings, snowpack
 - [ ] First greenness adapter
 
+### Milestone 6.5 — Neighborhood companion (spec 022)
+- [x] `ecology_whats_changed`: arrivals, departures and shifts near home ✅ 2026-11-14
+
 ### Phase 6 Definition of Done
 - "Normal" means the place's own long record for that time of year
 - A public scorecard exists for the flow detector

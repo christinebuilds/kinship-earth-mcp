@@ -394,6 +394,124 @@ async def ecology_whats_around_me(
     }
 
 
+_CHANGE_CAVEAT = (
+    "These are reports by volunteers, so a change can reflect who went out "
+    "looking as much as what was there."
+)
+
+
+@mcp.tool()
+async def ecology_whats_changed(
+    lat: float,
+    lon: float,
+    radius_km: float = 5,
+    window_days: int = 14,
+) -> dict:
+    """
+    What is new near here, and what has left?
+
+    Compares species reported in the last `window_days` with the period just
+    before it, and with the same time last year. Returns arrivals, departures
+    and species reported much more or less often, each with one plain sentence.
+
+    Use this for "what changed near me?", "who just arrived?", "is this on
+    time?". Use ecology_whats_around_me for a plain list of recent sightings.
+
+    Args:
+        lat: Latitude in decimal degrees.
+        lon: Longitude in decimal degrees (negative = West).
+        radius_km: How far to look (default 5 km, a neighborhood).
+        window_days: Length of each comparison period in days (default 14).
+
+    Sources: iNaturalist, plus eBird when an eBird key is configured. Counts
+    are sightings reported, not animals present; read the caveat in the result.
+    """
+    from datetime import datetime, timedelta, timezone
+
+    from kinship_shared.seasonal_changes import seasonal_changes, tally
+
+    today = datetime.now(timezone.utc).date()
+    now_start = today - timedelta(days=window_days - 1)
+    before_end = now_start - timedelta(days=1)
+    before_start = before_end - timedelta(days=window_days - 1)
+    ly_start = now_start - timedelta(days=365 + 7)
+    ly_end = today - timedelta(days=365 - 7)
+
+    adapters = [_inat]
+    if getattr(_ebird, "_api_key", None):
+        adapters.append(_ebird)
+
+    async def _fetch(start, end) -> tuple[list, list[str]]:
+        observations, sources = [], []
+        for adapter in adapters:
+            try:
+                found = await adapter.search(SearchParams(
+                    lat=lat, lng=lon, radius_km=radius_km,
+                    start_date=start.isoformat(), end_date=end.isoformat(), limit=200,
+                ))
+            except Exception as e:
+                logger.warning("ecology_whats_changed: %s failed: %s", adapter.id, e)
+                continue
+            in_range = [o for o in found if o.observed_at and start <= o.observed_at.date() <= end]
+            if in_range:
+                observations.extend(in_range)
+                sources.append(adapter.id)
+        return observations, sources
+
+    now_obs, now_sources = await _fetch(now_start, today)
+    before_obs, before_sources = await _fetch(before_start, before_end)
+    ly_obs, ly_sources = await _fetch(ly_start, ly_end)
+
+    now_w = tally(now_obs, now_start, today)
+    before_w = tally(before_obs, before_start, before_end)
+    ly_w = tally(ly_obs, ly_start, ly_end) if ly_obs else None
+
+    changes = seasonal_changes(now_w, before_w, ly_w)
+    counts = {k: sum(1 for c in changes if c.kind == k) for k in ("arrived", "departed", "more_often", "less_often")}
+
+    def _n(n: int, one: str, many: str) -> str:
+        return f"{n} {one if n == 1 else many}"
+
+    if changes:
+        parts = [_n(counts["arrived"], "arrival", "arrivals"), _n(counts["departed"], "departure", "departures")]
+        shifted = counts["more_often"] + counts["less_often"]
+        if shifted:
+            parts.append(f"{shifted} reported much more or less often")
+        summary = ", ".join(parts) + f" in the last {window_days} days."
+    else:
+        summary = f"No clear arrivals or departures in the last {window_days} days."
+
+    caveat = _CHANGE_CAVEAT
+    if now_w.n_observations < 20 or before_w.n_observations < 20:
+        caveat += " The sample here is small, so treat this as a hint, not a finding."
+
+    result = {
+        "location": {"lat": round(lat, 2), "lon": round(lon, 2), "radius_km": radius_km},
+        "windows": {
+            "now": [now_start.isoformat(), today.isoformat()],
+            "before": [before_start.isoformat(), before_end.isoformat()],
+            "last_year": [ly_start.isoformat(), ly_end.isoformat()],
+        },
+        "observations": {
+            "now": now_w.n_observations,
+            "before": before_w.n_observations,
+            "last_year": ly_w.n_observations if ly_w else 0,
+        },
+        "changes": [c.model_dump(mode="json") for c in changes[:25]],
+        "summary": summary,
+        "caveat": caveat,
+        "sources_queried": sorted(set(now_sources + before_sources)) or [a.id for a in adapters],
+        "last_year_sources": ly_sources,
+    }
+    # A home location is private: store it rounded to about 1 km.
+    asyncio.create_task(_store_turn(
+        "ecology_whats_changed",
+        {"lat": round(lat, 2), "lon": round(lon, 2), "radius_km": radius_km, "window_days": window_days},
+        {"summary": summary},
+    ))
+    return result
+
+
 @mcp.tool()
 async def ecology_graph_stats() -> dict:
     """

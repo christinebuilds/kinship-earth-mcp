@@ -125,6 +125,7 @@ These combine multiple data sources in a single answer:
 |------|-------------|
 | `ecology_get_environmental_context` | Climate + nearest monitoring sites for any point and date |
 | `ecology_search` | Unified search across all sources — species, sites, and climate |
+| `ecology_whats_changed` | What arrived, left or shifted near a place in the last two weeks, compared with last year |
 | `ecology_describe_sources` | What data sources are available and their capabilities |
 
 You can also run individual data source servers for more granular access:

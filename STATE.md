@@ -1,6 +1,6 @@
 # STATE — Kinship Earth MCP
 
-_Last updated: 2026-11-13 by Claude (runner wake 3)_
+_Last updated: 2026-11-14 by Claude (runner wake 4)_
 
 ## Where we are
 Direction: `docs/DIRECTION.md` (read first). "Is this normal for here, and
@@ -11,6 +11,8 @@ San Francisco. This branch is `main` (through PR #16) plus the runner's work:
 - Spec 015 (honest baselines) half done: `FlowClimatology`,
   `flow_climatology`, `flow_percentile`, percentile-based `FlowDetector`,
   new `EcosystemState` fields, 9 offline tests.
+- Spec 022 done: `ecology_whats_changed` (arrivals and departures near
+  home), tested with faked adapters only.
 
 ## Blocked: network
 The runner's cloud environment (Default) refuses every data API. Needed:
@@ -20,23 +22,24 @@ session is still on Default. Until a host allowlist exists, 015's
 remaining half, 016 and 018 cannot run.
 
 ## Next up (no decision needed)
-1. If the network allows: finish spec 015 — USGS `get_daily_record` (probe
+1. Each wake, first: triage open `bug` issues without `fix-ready` (none on
+   2026-11-14).
+2. If the network allows: finish spec 015 — USGS `get_daily_record` (probe
    paging live first), single-gauge `compute_baselines_from_usgs`, 30-year
-   ERA5 normals with trend, `state_builder` wiring, README sentences.
-2. Otherwise build spec 022 (`ecology_whats_changed`); it is `ready` and
-   needs no network.
-3. Write specs 019–021 (satellite source cards, canon MCP tools, canon CI).
-4. Specs 016 and 018 after 015 and network.
-5. Each wake, first: triage open `bug` issues without `fix-ready` (none on
-   2026-11-13). Christine allowed fix PRs, merged only after her yes on a
-   `merge-fix-N` decision.
+   ERA5 normals with trend, `state_builder` wiring, README sentences. Then
+   try `ecology_whats_changed` once against live iNaturalist.
+3. Otherwise: issue #18 (`data-gap`: neighborhood flood outlook) — find the
+   open data, write a spec, file a Radar decision on whether to queue it.
+4. Write specs 019–021 (satellite source cards, canon MCP tools, canon CI).
+5. Specs 016 and 018 after 015 and network.
 
 ## Waiting on Christine
 Project Radar (https://claude.ai/artifact/4e5P3qeCmC1rctQUrn651Q):
-- Network: environment `kinship-earth-mcp` now exists with the three data
-  hosts (approved 2026-11-13), but this runner session cannot move onto it.
-  The runner needs to be restarted on that environment (new session or the
-  wake routine pointed at it); until then the hosts stay blocked here.
+- Network: marked done in the Radar, but on 2026-11-14 the runner session
+  is still on Default and every data host is refused. The wake still lands
+  in this old session, which cannot be moved. It needs a new session on
+  `kinship-earth-mcp` with the wake routine pointed at that session.
+  `api.inaturalist.org` should be added to that environment too.
 - PR #17 (bug tracking): she said merge, but GitHub blocks it — its `test`
   check was cancelled at 15 minutes. Needs a green re-run by the PR's author
   session before the runner merges.
@@ -52,9 +55,9 @@ Project Radar (https://claude.ai/artifact/4e5P3qeCmC1rctQUrn651Q):
 - Christine is the first pattern reviewer (her answer, 2026-11-13).
 
 ## Recently done
+- 2026-11-14 — Spec 022 built: `ecology_whats_changed`
 - 2026-11-13 — Spec 022 written (neighborhood companion)
 - 2026-11-13 — Merged main; INFORMS edge; offline half of spec 015
-- 2026-11-12 — Pattern schema, loader, validator (now spec 017)
 
 ## How to resume
 - Protocol: `CLAUDE.md`; queue: `specs/QUEUE.md`. Decisions: Project Radar.
