@@ -1,0 +1,24 @@
+# Placeholder IDs for canon nodes not yet written.
+# Edges pointing to these IDs are permitted; the node file is expected to arrive
+# in a future PR. Remove an ID here when the full node file lands.
+
+- tweedie-distributions
+- fluctuation-scaling-physics
+- density-dependence
+- kleibers-law
+- species-area-relationship
+- metabolic-temperature-dependence
+- mays-stability-complexity
+- holling-functional-responses
+- lotka-volterra
+- macarthur-wilson-biogeography
+- hubbells-neutral-theory
+- hutchinsons-paradox-plankton
+- competitive-exclusion
+- latitudinal-diversity-gradient
+- rapoports-rule
+- bergmanns-rule
+- harte-equation-of-state
+- metabolic-theory-of-ecology
+- lindemans-trophic-efficiency
+- holling-resilience

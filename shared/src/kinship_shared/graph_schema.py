@@ -23,6 +23,7 @@ EntityType = Literal[
     "query",
     "finding",
     "data_source",
+    "pattern",
 ]
 
 RelationshipType = Literal[
@@ -36,6 +37,16 @@ RelationshipType = Literal[
     "MONITORED_BY",
     "SOURCED_FROM",
     "SIMILAR_TO",
+    # Canon pattern relationships
+    "DERIVES_FROM",
+    "GENERALIZES",
+    "SPECIAL_CASE_OF",
+    "SUPPORTS",
+    "CONTRADICTS",
+    "REQUIRES",
+    "ANALOG_OF",
+    "TESTED_BY",
+    "EVIDENCED_BY",
 ]
 
 
