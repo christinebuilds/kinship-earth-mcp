@@ -31,9 +31,9 @@
 | 12 | `012-anomaly-detection.md` | done | 2026-05-13 | 2026-05-11 | Phase 5.2 |
 | 13 | `013-event-synthesis.md` | done | 2026-05-14 | 2026-10-31 | Phase 5.3 |
 | 14 | `014-new-data-sources.md` | done | 2026-05-15 | 2026-11-05 | Phase 5.4 |
-| 15 | `015-honest-baselines.md` | ready | 2026-11-13 | | Phase 6 — per-gauge day-of-year flow record, 30-yr climate normals (docs/DIRECTION.md) |
-| 16 | `016-history-replay-scorecard.md` | ready | 2026-11-14 | | Phase 6 — depends on 015; needs web search for event sources |
-| 17 | `017-canon-schema.md` | ready | 2026-11-15 | | Phase 6 — pattern files + graph extension (docs/CANON.md) |
+| 15 | `015-honest-baselines.md` | blocked | 2026-11-13 | | Requires live USGS API call before building; blocked by 403 in cloud env |
+| 16 | `016-history-replay-scorecard.md` | blocked | 2026-11-14 | | Depends on 015; also needs live USGS gauge metadata calls |
+| 17 | `017-canon-schema.md` | done | 2026-11-15 | 2026-11-15 | Phase 6 — pattern files + graph extension; 8 tests; branch claude/spec-017-canon-schema |
 | 18 | `018-first-node-taylor.md` | ready | 2026-11-16 | | Phase 6 — depends on 017 |
 | 19 | `019-satellite-source-cards.md` | queued | | | Source cards + first greenness adapter |
 | 20 | `020-canon-mcp-tools.md` | queued | | | canon_list/get/neighbors/check/propose |
@@ -48,9 +48,10 @@
 
 ## Inventory
 
-- **Specs ready:** 4
+- **Specs ready:** 1 (018)
+- **Specs blocked:** 2 (015, 016 — require USGS live API, blocked in cloud env)
 - **Specs queued (need writing):** 3
-- **Specs done:** 14
-- **Buffer:** 4 specs ready — write 019 after 016 lands
+- **Specs done:** 15
+- **Buffer:** 1 spec ready — write 019+ after 015/016 unblock OR continue with 018
 
 > When buffer drops to 2 or fewer, the next interactive session should prioritize writing more specs.
