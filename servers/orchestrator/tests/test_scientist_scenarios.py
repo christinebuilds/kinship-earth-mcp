@@ -285,6 +285,7 @@ class TestWatershedEcologist:
     for marine species in the adjacent waters, with shared climate context.
     """
 
+    @pytest.mark.network
     @pytest.mark.asyncio
     async def test_step1_find_coastal_neon_sites(self):
         """
@@ -472,6 +473,7 @@ class TestPhenologyResearcher:
             f"implausible for Alabama in summer."
         )
 
+    @pytest.mark.network
     @pytest.mark.asyncio
     async def test_step3_compare_sites_shows_latitudinal_gradient(self):
         """

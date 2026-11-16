@@ -118,6 +118,7 @@ class TestContract:
 
 class TestSemantic:
 
+    @pytest.mark.network
     @pytest.mark.asyncio
     async def test_sf_has_observations(self):
         """San Francisco should always have ecological observations."""

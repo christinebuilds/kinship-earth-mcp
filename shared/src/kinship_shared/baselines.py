@@ -276,6 +276,8 @@ async def compute_baselines_from_usgs(
     min_years: int = 10,
     window_days: int = 7,
     max_candidates: int = 5,
+    same_watershed: bool = True,
+    huc_digits: int = 10,
 ) -> dict:
     """Streamflow baseline from ONE gauge's own day-of-year record.
 
@@ -287,6 +289,13 @@ async def compute_baselines_from_usgs(
 
     Keys kept for older callers: ``streamflow_mean_cfs`` is now the
     day-of-year median (p50) and ``streamflow_std_cfs`` the IQR / 1.349.
+    With ``same_watershed`` (the default, Christine's call 2026-11-14), a
+    gauge counts only if its hydrologic unit matches the point's to
+    ``huc_digits`` digits (10 = a USGS "watershed"; 8, the subbasin, spans whole bays). A gauge in the next
+    watershed over would describe a different river. When the point's
+    watershed cannot be determined, or no gauge in it qualifies, the result
+    is ``{"baseline_kind": "no_gauge_in_watershed"}``.
+
     When ``current_flow`` is not given, the gauge's latest daily mean within
     7 days of the target is used and returned as ``current_flow_cfs``.
     """
@@ -297,6 +306,21 @@ async def compute_baselines_from_usgs(
         gauges = await usgs_adapter.find_discharge_gauges(lat, lng, radius_km)
     except Exception:
         return insufficient
+
+    if same_watershed:
+        try:
+            point_huc = await usgs_adapter.watershed_huc(lat, lng)
+        except Exception:
+            point_huc = None
+        no_gauge = {"baseline_kind": "no_gauge_in_watershed"}
+        if not point_huc:
+            return no_gauge
+        key = point_huc[:huc_digits]
+        no_gauge["watershed_huc"] = key
+        gauges = [g for g in gauges if (g.get("huc") or "")[:huc_digits] == key]
+        if not gauges:
+            return no_gauge
+        insufficient = {**insufficient, "watershed_huc": key}
 
     for gauge in gauges:
         if max_candidates <= 0:
@@ -318,6 +342,7 @@ async def compute_baselines_from_usgs(
             "baseline_kind": "doy_record",
             "site_id": gauge["site_id"],
             "gauge_distance_km": gauge.get("distance_km"),
+            "gauge_huc": gauge.get("huc"),
             "streamflow_mean_cfs": clim.p50,
             "streamflow_std_cfs": round((clim.p75 - clim.p25) / 1.349, 3),
             "climatology": clim.model_dump(mode="json"),

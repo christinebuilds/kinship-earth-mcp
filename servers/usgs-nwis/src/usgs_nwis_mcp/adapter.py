@@ -189,8 +189,8 @@ class USGSNWISAdapter(EcologicalAdapter):
         Uses the time-series-metadata collection, which lists each daily
         series with its begin and end dates, so gauges without a discharge
         record (wells, one-off sampling sites) are never fetched.
-        Returns dicts with site_id, lat, lng, distance_km, begin, end
-        (dates), nearest first.
+        Returns dicts with site_id, lat, lng, huc (hydrologic unit code,
+        usually 12 digits), distance_km, begin, end (dates), nearest first.
         """
         bbox = _radius_to_bbox(lat, lng, radius_km)
         async with httpx.AsyncClient(timeout=60, headers=self._headers()) as client:
@@ -223,9 +223,23 @@ class USGSNWISAdapter(EcologicalAdapter):
                 begin, end = min(begin, prev["begin"]), max(end, prev["end"])
             gauges[site_id] = {
                 "site_id": site_id, "lat": g_lat, "lng": g_lng,
+                "huc": props.get("hydrologic_unit_code") or (prev or {}).get("huc"),
                 "distance_km": round(dist, 2), "begin": begin, "end": end,
             }
         return sorted(gauges.values(), key=lambda g: g["distance_km"])
+
+    async def watershed_huc(self, lat: float, lng: float, radius_km: float = 10.0) -> str | None:
+        """Hydrologic unit code for a point, taken from the nearest USGS
+        monitoring location (any type: stream, well, spring) within
+        radius_km. A proxy: the national watershed boundary service is not
+        reachable from every deployment. None when no site is near enough."""
+        async with httpx.AsyncClient(timeout=60, headers=self._headers()) as client:
+            sites = await self._find_sites_near(client, lat, lng, radius_km)
+        for site in sites:  # nearest first
+            huc = site.get("properties", {}).get("hydrologic_unit_code")
+            if huc:
+                return huc
+        return None
 
     def _cache_path(self, site_id: str, parameter_code: str) -> Path:
         return self.cache_dir / f"{site_id}_{parameter_code}.json"

@@ -93,6 +93,7 @@ async def test_environmental_context_returns_climate_and_sites():
     assert "neonscience" in result["data_sources_used"]
 
 
+@pytest.mark.network
 @pytest.mark.asyncio
 async def test_environmental_context_has_provenance():
     """
@@ -111,6 +112,7 @@ async def test_environmental_context_has_provenance():
 # ecology_search
 # ---------------------------------------------------------------------------
 
+@pytest.mark.network
 @pytest.mark.asyncio
 async def test_unified_search_with_species_and_location():
     """
@@ -159,6 +161,7 @@ async def test_unified_search_with_species_and_location():
     assert "obis_records_returned" in ctx
 
 
+@pytest.mark.network
 @pytest.mark.asyncio
 async def test_unified_search_species_only():
     """
@@ -178,6 +181,7 @@ async def test_unified_search_species_only():
     assert result["climate"] is None, "No climate without location/dates"
 
 
+@pytest.mark.network
 @pytest.mark.asyncio
 async def test_unified_search_location_only():
     """

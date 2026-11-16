@@ -1,6 +1,6 @@
 # STATE — Kinship Earth MCP
 
-_Last updated: 2026-11-14 by Claude (runner wake 6)_
+_Last updated: 2026-11-16 by Claude (runner wake 7)_
 
 ## Where we are
 Direction: `docs/DIRECTION.md` (read first). "Is this normal for here, and
@@ -11,11 +11,20 @@ Open-Meteo archive and NEON. `api.inaturalist.org` is still refused.
   own day-of-year record. Live: Russian River at Guerneville (USGS-11467000),
   87 years, 179 cfs vs median 307 = 13th percentile, no anomaly. Climate
   normals cover 30 years (1996–2025) and report a trend.
+- Same-watershed rule (her answer 2026-11-14): a gauge counts only if it
+  shares the point's 10-digit USGS watershed code; otherwise
+  `no_gauge_in_watershed`. Russian River places keep their gauges. Mission
+  Creek still matches San Mateo Creek (27 km) because USGS draws one
+  watershed around both; exact fix needs api.water.usgs.gov (Radar).
+- CI split (her yes 2026-11-14): half done. 7 tests that call live
+  services are marked `network`; the offline command now passes
+  `-m "not network"` (190 pass). Editing `.github/workflows` was refused by
+  this session's permission check, so the workflow is unchanged.
 - Specs 017 and 022 done earlier.
 
 ## Next up (no decision needed)
 1. Each wake, first: triage open `bug` issues without `fix-ready` (none on
-   2026-11-14).
+   2026-11-16).
 2. Spec 016 (history replay + scorecard): `ready`. It needs a sourced list
    of past Russian River flow events (web search), then a no-look-ahead
    replay using `get_daily_record` (cached, so replay is cheap).
@@ -27,11 +36,13 @@ Open-Meteo archive and NEON. `api.inaturalist.org` is still refused.
 
 ## Waiting on Christine
 Project Radar (https://claude.ai/artifact/4e5P3qeCmC1rctQUrn651Q):
-- **Mission Creek gauge** (new): no USGS gauge in SF. Say "no gauge",
-  use the nearest (a Marin creek 20 km away), or same watershed only?
-  Until answered, the code uses the nearest gauge within 50 km with ≥10 years.
-- PR #17 (bug tracking): she said merge, but its `test` check is still
-  cancelled (checked 2026-11-14). Needs a green re-run by its author session.
+- **CI workflow edit**: needs a session allowed to edit `.github/workflows`.
+  Plan: `test.yml` runs the offline command with `-m "not network"`;
+  a new `nightly.yml` runs the full suite on a schedule (60 min limit).
+- **api.water.usgs.gov** (new Radar row): lets "same watershed" mean
+  connected by water.
+- PR #17 (bug tracking): her re-run was cancelled at 15 min again
+  (2026-11-14). She can merge it as owner, or it waits for the CI split.
 - Add a GitHub token on Railway (her action).
 - `api.inaturalist.org` on this environment's allowlist, so
   `ecology_whats_changed` can be tried live.
@@ -42,11 +53,14 @@ Project Radar (https://claude.ai/artifact/4e5P3qeCmC1rctQUrn651Q):
   begin/end dates, the cheap way to pick a gauge.
 - The old `discharge_cfs` key bug is gone: flow now comes from the gauge's
   daily record, not a pooled search that mixed in water temperature.
-- 3 tests in the "offline" command fail here because OBIS and iNaturalist
-  answer 403; same before and after spec 015.
+- Watershed codes come from the nearest USGS site within 10 km (the
+  national boundary service hydro.nationalmap.gov is blocked here).
+- `test_whats_around_me.py` still calls live sightings services in the
+  offline set (passes slowly, ~100 s); mark it `network` with the CI split.
 - `EcologicalGraph` keeps one edge per node pair.
 
 ## Recently done
+- 2026-11-16 — Same-watershed gauge rule; live tests marked `network`
 - 2026-11-14 — Spec 015 finished (live gauges, 30-yr normals); network Radar row applied
 - 2026-11-14 — Spec 022 built: `ecology_whats_changed`
 - 2026-11-13 — Merged main; INFORMS edge; offline half of spec 015
@@ -54,5 +68,5 @@ Project Radar (https://claude.ai/artifact/4e5P3qeCmC1rctQUrn651Q):
 ## How to resume
 - Protocol: `CLAUDE.md`; queue: `specs/QUEUE.md`. Decisions: Project Radar.
 - Offline tests: the `-k "not (...)"` command under Testing in `CLAUDE.md`.
-  Live tests are marked `@pytest.mark.network`.
+  It now includes `-m "not network"`; live tests carry that marker.
 - Runner branch: `claude/runner-kinship-earth`. Never push to main.

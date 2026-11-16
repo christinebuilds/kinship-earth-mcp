@@ -486,7 +486,7 @@ class EcosystemState(BaseModel):
         default=None, description="Percentile (0-100) of current flow in the gauge's own record for this time of year"
     )
     streamflow_baseline_kind: Optional[str] = Field(
-        default=None, description="'doy_record' when the baseline is the gauge's day-of-year record"
+        default=None, description="'doy_record' (gauge's own day-of-year record), 'insufficient_record' or 'no_gauge_in_watershed'"
     )
     streamflow_site_id: Optional[str] = Field(default=None, description="Gauge the flow baseline comes from")
     streamflow_record_years: Optional[int] = Field(default=None, description="Years of record behind the flow baseline")

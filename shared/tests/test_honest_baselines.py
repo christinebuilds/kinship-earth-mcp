@@ -20,8 +20,12 @@ def _seasonal_record(start_year: int, end: date, scale: float = 1.0) -> list[tup
 
 
 class FakeUSGS:
-    def __init__(self, gauges, records):
+    def __init__(self, gauges, records, point_huc="180101100903"):
         self.gauges, self.records, self.fetched = gauges, records, []
+        self.point_huc = point_huc
+
+    async def watershed_huc(self, lat, lng, radius_km=10.0):
+        return self.point_huc
 
     async def find_discharge_gauges(self, lat, lng, radius_km=50.0):
         return self.gauges
@@ -35,8 +39,9 @@ class FakeUSGS:
         return rec
 
 
-def _gauge(site_id, km, begin, end=date(2026, 11, 12)):
-    return {"site_id": site_id, "distance_km": km, "begin": begin, "end": end, "lat": 0, "lng": 0}
+def _gauge(site_id, km, begin, end=date(2026, 11, 12), huc="180101100901"):
+    return {"site_id": site_id, "distance_km": km, "begin": begin, "end": end,
+            "lat": 0, "lng": 0, "huc": huc}
 
 
 async def test_skips_short_record_and_uses_one_gauge():
@@ -68,13 +73,39 @@ async def test_current_flow_given_sets_percentile():
 async def test_insufficient_record_has_no_streamflow_keys():
     usgs = FakeUSGS([_gauge("USGS-SHORT", 1.0, date(2020, 1, 1))], {})
     res = await compute_baselines_from_usgs(usgs, 38.5, -122.9, TARGET)
-    assert res == {"baseline_kind": "insufficient_record"}
+    assert res["baseline_kind"] == "insufficient_record"
+    assert "streamflow_mean_cfs" not in res
 
 
 async def test_inactive_gauge_skipped():
     usgs = FakeUSGS([_gauge("USGS-OLD", 1.0, date(1950, 1, 1), end=date(1990, 1, 1))], {})
     res = await compute_baselines_from_usgs(usgs, 38.5, -122.9, TARGET)
     assert res["baseline_kind"] == "insufficient_record"
+
+
+async def test_gauge_in_another_watershed_is_not_used():
+    """Mission Creek case: the only long-record gauge is in a different subbasin."""
+    marin = _gauge("USGS-MARIN", 20.0, date(2000, 1, 1), huc="180500050506")
+    usgs = FakeUSGS([marin], {"USGS-MARIN": _seasonal_record(2000, date(2026, 11, 12))},
+                    point_huc="180500040904")
+    res = await compute_baselines_from_usgs(usgs, 37.77, -122.39, TARGET)
+    assert res == {"baseline_kind": "no_gauge_in_watershed", "watershed_huc": "1805000409"}
+    assert usgs.fetched == []
+
+
+async def test_unknown_point_watershed_uses_no_gauge():
+    usgs = FakeUSGS([_gauge("USGS-LONG", 2.0, date(1950, 1, 1))],
+                    {"USGS-LONG": _seasonal_record(1950, date(2026, 11, 12))}, point_huc=None)
+    res = await compute_baselines_from_usgs(usgs, 38.5, -122.9, TARGET)
+    assert res["baseline_kind"] == "no_gauge_in_watershed"
+
+
+async def test_same_watershed_can_be_turned_off():
+    marin = _gauge("USGS-MARIN", 20.0, date(2000, 1, 1), huc="180500050506")
+    usgs = FakeUSGS([marin], {"USGS-MARIN": _seasonal_record(2000, date(2026, 11, 12))},
+                    point_huc="180500040904")
+    res = await compute_baselines_from_usgs(usgs, 37.77, -122.39, TARGET, same_watershed=False)
+    assert res["site_id"] == "USGS-MARIN"
 
 
 class FakeERA5:
