@@ -1,6 +1,6 @@
 # STATE — Kinship Earth MCP
 
-_Last updated: 2026-11-16 by Claude (runner wake 7)_
+_Last updated: 2026-11-18 by Claude (runner wake 9)_
 
 ## Where we are
 Direction: `docs/DIRECTION.md` (read first). "Is this normal for here, and
@@ -24,10 +24,14 @@ Open-Meteo archive and NEON. `api.inaturalist.org` is still refused.
 
 ## Next up (no decision needed)
 1. Each wake, first: triage open `bug` issues without `fix-ready` (none on
-   2026-11-16).
-2. Spec 016 (history replay + scorecard): `ready`. It needs a sourced list
-   of past Russian River flow events (web search), then a no-look-ahead
-   replay using `get_daily_record` (cached, so replay is cheap).
+   2026-11-18).
+2. Spec 016, part 2: engine done (`shared/src/kinship_shared/replay.py`).
+   Next: source 8–12 events with WebSearch/WebFetch into
+   `canon/events/reference_events.yaml` (open every source; no dates from
+   memory), then `tools/replay_scorecard.py`, the 5/10/20 threshold sweep,
+   and the report. Figures need matplotlib added as a dev dependency.
+   First look (Guerneville, 87 yrs): long low episodes in 1977, 2009,
+   2014–15, 2020–22; 346 high episodes of ≥2 days (worth a note).
 3. Spec 018 (Taylor's power law on NEON bird counts): `ready`, NEON reachable.
 4. Issue #18 (`data-gap`: neighborhood flood outlook): find the open data,
    write a spec, file a Radar decision on whether to queue it.
@@ -39,8 +43,9 @@ Project Radar (https://claude.ai/artifact/4e5P3qeCmC1rctQUrn651Q):
 - **CI workflow edit**: needs a session allowed to edit `.github/workflows`.
   Plan: `test.yml` runs the offline command with `-m "not network"`;
   a new `nightly.yml` runs the full suite on a schedule (60 min limit).
-- **api.water.usgs.gov** (new Radar row): lets "same watershed" mean
-  connected by water.
+- **api.water.usgs.gov**: she said yes (2026-11-17), but the approval
+  prompt closed unanswered and the host is still refused. Radar row says
+  how to add it in Settings. Connected-by-water check waits on it.
 - PR #17 (bug tracking): her re-run was cancelled at 15 min again
   (2026-11-14). She can merge it as owner, or it waits for the CI split.
 - Add a GitHub token on Railway (her action).
@@ -60,6 +65,7 @@ Project Radar (https://claude.ai/artifact/4e5P3qeCmC1rctQUrn651Q):
 - `EcologicalGraph` keeps one edge per node pair.
 
 ## Recently done
+- 2026-11-18 — Spec 016 part 1: replay engine and scoring, 5 tests
 - 2026-11-16 — Same-watershed gauge rule; live tests marked `network`
 - 2026-11-14 — Spec 015 finished (live gauges, 30-yr normals); network Radar row applied
 - 2026-11-14 — Spec 022 built: `ecology_whats_changed`

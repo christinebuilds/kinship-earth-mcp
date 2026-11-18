@@ -32,7 +32,7 @@
 | 13 | `013-event-synthesis.md` | done | 2026-05-14 | 2026-10-31 | Phase 5.3 |
 | 14 | `014-new-data-sources.md` | done | 2026-05-15 | 2026-11-05 | Phase 5.4 |
 | 15 | `015-honest-baselines.md` | done | 2026-11-13 | 2026-11-14 | Phase 6. Per-gauge day-of-year flow record (USGS daily paging + 7-day disk cache, gauge chosen from time-series-metadata), 30-yr ERA5 normals in one call with trend, state_builder wired, README note. Live: Russian River at Guerneville, 87 years of record. Mission Creek has no gauge (Radar decision filed) |
-| 16 | `016-history-replay-scorecard.md` | ready | 2026-11-14 | | Phase 6 — 015 done; USGS reachable from the runner. Needs web search for event sources |
+| 16 | `016-history-replay-scorecard.md` | ready | 2026-11-14 | | Phase 6. Part 1 done 2026-11-18: `replay.py` (no-look-ahead replay, episodes, scoring) + 5 tests; 87-yr Russian River replay in 0.3 s. Left: sourced reference events (web search available), CLI + report, figures (matplotlib not installed), threshold sweep |
 | 17 | `017-canon-schema.md` | done | 2026-11-15 | 2026-11-12 | Phase 6 — pattern files + graph extension (docs/CANON.md). Built early under old number 015; INFORMS edge type added 2026-11-13 |
 | 18 | `018-first-node-taylor.md` | ready | 2026-11-16 | | Phase 6 — depends on 017 (done). data.neonscience.org reachable from the runner since 2026-11-14 |
 | 19 | `019-satellite-source-cards.md` | queued | | | Source cards + first greenness adapter |
