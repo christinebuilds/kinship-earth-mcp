@@ -1,0 +1,110 @@
+# Reference events for scoring the flow detector (spec 016).
+# Every entry cites a source that was opened, not written from memory.
+# Sourced 2026-11-19. All current entries come from the USGS annual peak-flow
+# record (instantaneous peaks), a separate product from the daily means the
+# detector uses. Each gives one peak date, so start = end = peak day.
+# Drought (low_flow) events are missing: their sources (USBR, CA Water Boards,
+# DWR, NOAA CNRFC, pubs.usgs.gov) were not reachable from the runner's network.
+# Gauges checked against time-series-metadata (daily discharge, 00060/00003):
+#   11467000 from 1939-10-01 | 11477000 from 1910-10-01 | 11530500 from 1910-10-01
+#   11425500 from 1929-10-01 | 11303500 from 1923-10-01
+events:
+  - id: russian-1986-02-flood
+    kind: high_flow
+    site_id: USGS-11467000
+    start: 1986-02-18
+    end: 1986-02-18
+    title: February 1986 Russian River peak (largest in gauge record)
+    source: "https://api.waterdata.usgs.gov/ogcapi/v0/collections/peaks/items?monitoring_location_id=USGS-11467000&parameter_code=00060&f=json&limit=200"
+    source_type: agency
+    note: "USGS annual peak 102,000 cfs on 1986-02-18 (regulated), highest in this gauge's peak record."
+  - id: russian-1995-01-flood
+    kind: high_flow
+    site_id: USGS-11467000
+    start: 1995-01-09
+    end: 1995-01-09
+    title: January 1995 Russian River peak
+    source: "https://api.waterdata.usgs.gov/ogcapi/v0/collections/peaks/items?monitoring_location_id=USGS-11467000&parameter_code=00060&f=json&limit=200"
+    source_type: agency
+    note: "USGS annual peak 93,900 cfs on 1995-01-09 (regulated); stage 48.01 ft."
+  - id: russian-1997-01-flood
+    kind: high_flow
+    site_id: USGS-11467000
+    start: 1997-01-01
+    end: 1997-01-01
+    title: New Year's 1997 Russian River peak
+    source: "https://api.waterdata.usgs.gov/ogcapi/v0/collections/peaks/items?monitoring_location_id=USGS-11467000&parameter_code=00060&f=json&limit=200"
+    source_type: agency
+    note: "USGS annual peak 82,100 cfs on 1997-01-01 (regulated); stage 44.99 ft."
+  - id: russian-2006-01-flood
+    kind: high_flow
+    site_id: USGS-11467000
+    start: 2006-01-01
+    end: 2006-01-01
+    title: New Year's 2006 Russian River peak
+    source: "https://api.waterdata.usgs.gov/ogcapi/v0/collections/peaks/items?monitoring_location_id=USGS-11467000&parameter_code=00060&f=json&limit=200"
+    source_type: agency
+    note: "USGS annual peak 86,000 cfs on 2006-01-01 (regulated); stage 44.26 ft."
+  - id: russian-2019-02-flood
+    kind: high_flow
+    site_id: USGS-11467000
+    start: 2019-02-28
+    end: 2019-02-28
+    title: February 2019 Russian River peak
+    source: "https://api.waterdata.usgs.gov/ogcapi/v0/collections/peaks/items?monitoring_location_id=USGS-11467000&parameter_code=00060&f=json&limit=200"
+    source_type: agency
+    note: "USGS annual peak 72,000 cfs on 2019-02-28 (regulated); stage 47.55 ft."
+  - id: eel-1997-01-flood
+    kind: high_flow
+    site_id: USGS-11477000
+    start: 1997-01-01
+    end: 1997-01-01
+    title: New Year's 1997 Eel River peak at Scotia
+    source: "https://api.waterdata.usgs.gov/ogcapi/v0/collections/peaks/items?monitoring_location_id=USGS-11477000&parameter_code=00060&f=json&limit=200"
+    source_type: agency
+    note: "USGS annual peak 360,000 cfs on 1997-01-01."
+  - id: eel-2019-02-flood
+    kind: high_flow
+    site_id: USGS-11477000
+    start: 2019-02-27
+    end: 2019-02-27
+    title: February 2019 Eel River peak at Scotia
+    source: "https://api.waterdata.usgs.gov/ogcapi/v0/collections/peaks/items?monitoring_location_id=USGS-11477000&parameter_code=00060&f=json&limit=200"
+    source_type: agency
+    note: "USGS annual peak 272,000 cfs on 2019-02-27."
+  - id: klamath-1997-01-flood
+    kind: high_flow
+    site_id: USGS-11530500
+    start: 1997-01-01
+    end: 1997-01-01
+    title: New Year's 1997 Klamath River peak near Klamath
+    source: "https://api.waterdata.usgs.gov/ogcapi/v0/collections/peaks/items?monitoring_location_id=USGS-11530500&parameter_code=00060&f=json&limit=200"
+    source_type: agency
+    note: "USGS annual peak 500,000 cfs on 1997-01-01 (estimated, regulated)."
+  - id: sacramento-verona-1997-01-flood
+    kind: high_flow
+    site_id: USGS-11425500
+    start: 1997-01-02
+    end: 1997-01-02
+    title: January 1997 Sacramento River peak at Verona (largest in gauge record)
+    source: "https://api.waterdata.usgs.gov/ogcapi/v0/collections/peaks/items?monitoring_location_id=USGS-11425500&parameter_code=00060&f=json&limit=200"
+    source_type: agency
+    note: "USGS annual peak 102,000 cfs on 1997-01-02, highest in this gauge's peak record."
+  - id: sacramento-verona-2017-02-flood
+    kind: high_flow
+    site_id: USGS-11425500
+    start: 2017-02-11
+    end: 2017-02-11
+    title: February 2017 Sacramento River peak at Verona
+    source: "https://api.waterdata.usgs.gov/ogcapi/v0/collections/peaks/items?monitoring_location_id=USGS-11425500&parameter_code=00060&f=json&limit=200"
+    source_type: agency
+    note: "USGS annual peak 80,400 cfs on 2017-02-11."
+  - id: sanjoaquin-vernalis-1997-01-flood
+    kind: high_flow
+    site_id: USGS-11303500
+    start: 1997-01-05
+    end: 1997-01-05
+    title: January 1997 San Joaquin River peak near Vernalis
+    source: "https://api.waterdata.usgs.gov/ogcapi/v0/collections/peaks/items?monitoring_location_id=USGS-11303500&parameter_code=00060&f=json&limit=200"
+    source_type: agency
+    note: "USGS annual peak 75,600 cfs on 1997-01-05 (regulated); second-highest in record after December 1950."

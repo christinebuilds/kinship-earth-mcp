@@ -69,6 +69,7 @@ def pooled(cards: list[Scorecard]) -> dict:
         "episodes_total": sum(c.episodes_total for c in cards),
         "episodes_unmatched": sum(c.episodes_unmatched for c in cards),
         "years_replayed": sum(c.years_replayed for c in cards),
+        "events_no_data": [e for c in cards for e in c.events_no_data],
     }
 
 
@@ -110,6 +111,9 @@ def write_markdown(results, events, path: Path, fig_dir_rel: str = "figures") ->
         "",
         "Lead is the first flagged day minus the documented start; negative means the",
         "detector flagged it before the documented start.",
+        "",
+        "Not scored (no daily data on the documented dates): "
+        + (", ".join(pooled([c for c, _, _ in results[HEADLINE].values()])["events_no_data"]) or "none") + ".",
         "",
         "## What this shows and what it does not",
         "",

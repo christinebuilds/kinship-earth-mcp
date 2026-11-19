@@ -1,6 +1,6 @@
 # STATE — Kinship Earth MCP
 
-_Last updated: 2026-11-18 by Claude (runner wake 9)_
+_Last updated: 2026-11-19 by Claude (runner wake 10)_
 
 ## Where we are
 Direction: `docs/DIRECTION.md` (read first). "Is this normal for here, and
@@ -24,15 +24,18 @@ Open-Meteo archive and NEON. `api.inaturalist.org` is still refused.
 
 ## Next up (no decision needed)
 1. Each wake, first: triage open `bug` issues without `fix-ready` (none on
-   2026-11-18).
-2. Spec 016, part 2: engine done (`shared/src/kinship_shared/replay.py`).
-   Next: source 8–12 events with WebSearch/WebFetch into
-   `canon/events/reference_events.yaml` (open every source; no dates from
-   memory), then `tools/replay_scorecard.py`, the 5/10/20 threshold sweep,
-   and the report. Figures need matplotlib added as a dev dependency.
-   First look (Guerneville, 87 yrs): long low episodes in 1977, 2009,
-   2014–15, 2020–22; 346 high episodes of ≥2 days (worth a note).
+   2026-11-19).
+2. Spec 016 is blocked on drought sources (Radar). Built: replay engine,
+   scoring (data gaps set aside, not counted as misses), CLI
+   `tools/replay_scorecard.py`, figures. `canon/events/reference_events.yaml`
+   has 11 flood peaks from USGS peak records. Preview (not published):
+   10/10 floods flagged 2–30 days early; ~5 unmatched episodes per river
+   per year, mostly 2-day winter highs. Klamath 1997 has no daily data.
+   When hosts open: source droughts (Russian 1977/2014–15/2021, Klamath
+   2021), run the CLI, commit `canon/scorecards/`, README "How often is it
+   right?", DIRECTION.md line.
 3. Spec 018 (Taylor's power law on NEON bird counts): `ready`, NEON reachable.
+   Do this next.
 4. Issue #18 (`data-gap`: neighborhood flood outlook): find the open data,
    write a spec, file a Radar decision on whether to queue it.
 5. Write specs 019–021 (satellite source cards, canon MCP tools, canon CI).
@@ -43,6 +46,9 @@ Project Radar (https://claude.ai/artifact/4e5P3qeCmC1rctQUrn651Q):
 - **CI workflow edit**: needs a session allowed to edit `.github/workflows`.
   Plan: `test.yml` runs the offline command with `-m "not network"`;
   a new `nightly.yml` runs the full suite on a schedule (60 min limit).
+- **Drought sources** (new Radar row): allow www.usbr.gov,
+  www.waterboards.ca.gov, water.ca.gov, www.cnrfc.noaa.gov, pubs.usgs.gov,
+  or publish flood-only.
 - **api.water.usgs.gov**: she said yes (2026-11-17), but the approval
   prompt closed unanswered and the host is still refused. Radar row says
   how to add it in Settings. Connected-by-water check waits on it.
@@ -65,6 +71,7 @@ Project Radar (https://claude.ai/artifact/4e5P3qeCmC1rctQUrn651Q):
 - `EcologicalGraph` keeps one edge per node pair.
 
 ## Recently done
+- 2026-11-19 — Spec 016: sourced flood events, scorecard CLI; held for droughts
 - 2026-11-18 — Spec 016 part 1: replay engine and scoring, 5 tests
 - 2026-11-16 — Same-watershed gauge rule; live tests marked `network`
 - 2026-11-14 — Spec 015 finished (live gauges, 30-yr normals); network Radar row applied

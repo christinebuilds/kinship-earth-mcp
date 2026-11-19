@@ -60,8 +60,12 @@ class Scorecard(BaseModel):
     low_pct: float
     high_pct: float
     years_replayed: int
-    events_total: int
+    events_total: int = Field(description="Events with replayed data in their window")
     events_hit: int
+    events_no_data: list[str] = Field(
+        default_factory=list,
+        description="Events whose dates have no replayed values (gauge gap); not counted as misses",
+    )
     lead_days_median: Optional[float] = Field(
         default=None,
         description="First flag relative to documented start; negative = flagged before",
@@ -190,6 +194,11 @@ def score(
     is unmatched when it overlaps no event of its kind.
     """
     events = [e for e in events if e.site_id == site_id]
+    judged = {rd.day for rd in days if rd.percentile is not None}
+    no_data = [e.id for e in events
+               if not any(e.start + timedelta(days=k) in judged
+                          for k in range((e.end - e.start).days + 1))]
+    events = [e for e in events if e.id not in no_data]
     hits: dict[str, Optional[int]] = {}
     leads: list[int] = []
     for ev in events:
@@ -207,6 +216,11 @@ def score(
                             for ev in events)]
     years = {rd.day.year for rd in days if rd.percentile is not None}
     notes = []
+    if no_data:
+        notes.append(
+            "No daily data on the documented dates (gauge gap), so not scored: "
+            + ", ".join(no_data)
+        )
     if unmatched:
         notes.append(
             "Unmatched episodes are not false alarms: the reference list is short, "
@@ -215,7 +229,7 @@ def score(
     return Scorecard(
         site_id=site_id, low_pct=low_pct, high_pct=high_pct,
         years_replayed=len(years),
-        events_total=len(events), events_hit=sum(1 for v in hits.values() if v is not None),
+        events_total=len(events), events_no_data=no_data, events_hit=sum(1 for v in hits.values() if v is not None),
         lead_days_median=float(median(leads)) if leads else None,
         episodes_total=len(episodes), episodes_unmatched=len(unmatched),
         hits=hits, unmatched=unmatched, notes=notes,

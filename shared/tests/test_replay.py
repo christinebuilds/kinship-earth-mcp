@@ -79,3 +79,12 @@ def test_unmatched_episode_does_not_change_event_count():
     assert card.hits["e"] == -9
     assert card.episodes_unmatched == 1 and card.unmatched[0].kind == "high"
     assert any("not false alarms" in n for n in card.notes)
+
+
+def test_event_in_data_gap_is_not_a_miss():
+    days = _days(["high"] * 3, start=date(2000, 1, 1))
+    gap = ReferenceEvent(id="gap", kind="high_flow", site_id="S",
+                         start=date(2001, 1, 1), end=date(2001, 1, 1))
+    card = score("S", days, [], [gap])
+    assert card.events_total == 0 and card.events_no_data == ["gap"]
+    assert "gap" not in card.hits
