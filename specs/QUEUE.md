@@ -34,7 +34,7 @@
 | 15 | `015-honest-baselines.md` | blocked | 2026-11-13 | | Requires live USGS API call before building; blocked by 403 in cloud env |
 | 16 | `016-history-replay-scorecard.md` | blocked | 2026-11-14 | | Depends on 015; also needs live USGS gauge metadata calls |
 | 17 | `017-canon-schema.md` | done | 2026-11-15 | 2026-11-15 | Phase 6 — pattern files + graph extension; 8 tests; branch claude/spec-017-canon-schema |
-| 18 | `018-first-node-taylor.md` | ready | 2026-11-16 | | Phase 6 — depends on 017 |
+| 18 | `018-first-node-taylor.md` | done | 2026-11-16 | 2026-11-19 | Phase 6 — NEON adapter, check runner, canon node, 3 tests; network test needs local run |
 | 19 | `019-satellite-source-cards.md` | queued | | | Source cards + first greenness adapter |
 | 20 | `020-canon-mcp-tools.md` | queued | | | canon_list/get/neighbors/check/propose |
 | 21 | `021-canon-ci-and-contributing.md` | queued | | | CI validation + pattern/evidence/edge PR guide |
@@ -48,10 +48,10 @@
 
 ## Inventory
 
-- **Specs ready:** 1 (018)
+- **Specs ready:** 0
 - **Specs blocked:** 2 (015, 016 — require USGS live API, blocked in cloud env)
 - **Specs queued (need writing):** 3
-- **Specs done:** 15
-- **Buffer:** 1 spec ready — write 019+ after 015/016 unblock OR continue with 018
+- **Specs done:** 16
+- **Buffer: 0 specs ready — WRITE NEW SPECS (019+) in next interactive session**
 
 > When buffer drops to 2 or fewer, the next interactive session should prioritize writing more specs.

@@ -252,6 +252,12 @@ uv run --package kinship-orchestrator pytest servers/ -v
 
 ---
 
+## The Kinship Canon
+
+Kinship Earth now carries a canon of ecological patterns — a machine-readable library of known quantitative regularities, each with an executable check against the data federation. The first node is **Taylor's power law** (`canon/patterns/taylors-power-law.md`): for a species counted repeatedly across sites or times, the variance of counts grows as a power of the mean, with exponent b between 1 and 2. The check runner (`canon/checks/taylors_power_law.py`) verifies this against NEON breeding-landbird point counts and commits the fitted b, its 95% bootstrap CI, and a figure to `canon/snapshots/`. Run it locally with `uv run python canon/checks/taylors_power_law.py` after NEON network access is confirmed.
+
+---
+
 ## Citation
 
 If you use Kinship Earth in research, please cite the underlying data sources:

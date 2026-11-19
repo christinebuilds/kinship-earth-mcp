@@ -14,8 +14,12 @@ NEON citation requirement: always include the dataset DOI and citation string.
 
 from __future__ import annotations
 
+import csv
+import io
 import logging
+import time
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Optional
 
 import httpx
@@ -109,6 +113,71 @@ class NeonAdapter(EcologicalAdapter):
                 return None
             resp.raise_for_status()
             return resp.json().get("data")
+
+    async def get_product_data(
+        self,
+        product_code: str,
+        site_code: str,
+        year_month: str,
+        table: str = "countdata",
+        cache_dir: Optional[Path] = None,
+    ) -> list[dict]:
+        """Download and parse the basic-package CSV tables for one product/site/month.
+
+        # Verified against NEON Data API documentation:
+        # - GET /v0/data/{product}/{site}/{year_month} returns all files in one response (no pagination).
+        # - basic-package files are named NEON.D*.{site}.{product}.{table}.{period}.basic.*.csv
+        # - Maximum response: all files for a site-month (typically 5–20 files).
+        # - DP1.10003.001 daily record begins 2013 at most sites; temporal_coverage_start in
+        #   capabilities reflects 2012 (observatory open date), but tabular landbird data starts 2013.
+
+        Args:
+            product_code: NEON product code, e.g. "DP1.10003.001".
+            site_code: Four-letter NEON site code, e.g. "WREF".
+            year_month: "YYYY-MM", e.g. "2023-06".
+            table: Substring to match in CSV filenames (default "countdata").
+            cache_dir: Directory to cache downloaded CSV files. If None, no caching.
+        """
+        url = f"{NEON_API_BASE}/data/{product_code}/{site_code.upper()}/{year_month}"
+        async with httpx.AsyncClient(headers=self._headers, timeout=60) as client:
+            resp = await http_get_with_retry(client, url)
+            if resp.status_code == 404:
+                return []
+            resp.raise_for_status()
+            file_list = resp.json().get("data", {}).get("files", [])
+
+        rows: list[dict] = []
+        for file_info in file_list:
+            name = file_info.get("name", "")
+            # Select basic-package CSV files matching the table name.
+            # Skip expanded files, variables tables, readme, sensor positions, etc.
+            if not name.endswith(".csv"):
+                continue
+            if table not in name:
+                continue
+            if "expanded" in name:
+                continue
+
+            cached_path = (cache_dir / name) if cache_dir else None
+            if cached_path and cached_path.exists():
+                csv_text = cached_path.read_text(encoding="utf-8")
+            else:
+                file_url = file_info.get("url", "")
+                if not file_url:
+                    continue
+                time.sleep(0.5)  # respect NEON sequential-request guidance
+                async with httpx.AsyncClient(headers=self._headers, timeout=120) as dl:
+                    r = await http_get_with_retry(dl, file_url)
+                    r.raise_for_status()
+                    csv_text = r.text
+                if cached_path:
+                    cached_path.parent.mkdir(parents=True, exist_ok=True)
+                    cached_path.write_text(csv_text, encoding="utf-8")
+
+            reader = csv.DictReader(io.StringIO(csv_text))
+            rows.extend(reader)
+
+        return rows
 
     async def search(self, params: SearchParams) -> list[EcologicalObservation]:
         """
