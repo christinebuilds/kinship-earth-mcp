@@ -128,7 +128,7 @@ When starting an autonomous session (no human present):
 uv run --package kinship-orchestrator pytest servers/ shared/tests/ -v
 
 # Offline-only tests (always runnable)
-uv run --package kinship-orchestrator pytest servers/orchestrator/tests/ shared/tests/ -v -m "not network" -k "not (climate or dolphin or cetac or wind_river or woods_hole or parallel or cross_persona or marine or reachable or coordinates or geographic or bird_survey or bird_data or catalog or nonexistent or empty_area or bogus)"
+uv run --package kinship-orchestrator pytest servers/orchestrator/tests/ shared/tests/ canon/checks/tests/ -v -m "not network" -k "not (climate or dolphin or cetac or wind_river or woods_hole or parallel or cross_persona or marine or reachable or coordinates or geographic or bird_survey or bird_data or catalog or nonexistent or empty_area or bogus)"
 ```
 
 ## Current Status (Updated 2026-11-12)

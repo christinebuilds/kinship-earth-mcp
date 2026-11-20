@@ -14,8 +14,13 @@ NEON citation requirement: always include the dataset DOI and citation string.
 
 from __future__ import annotations
 
+import asyncio
+import csv
+import io
 import logging
+import os
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Optional
 
 import httpx
@@ -41,6 +46,7 @@ class NeonAdapter(EcologicalAdapter):
     """Adapter for the NEON REST API."""
 
     def __init__(self, api_token: Optional[str] = None):
+        api_token = api_token or os.environ.get("NEON_API_TOKEN")
         self._token = api_token
         self._headers = {"X-API-Token": api_token} if api_token else {}
 
@@ -109,6 +115,55 @@ class NeonAdapter(EcologicalAdapter):
                 return None
             resp.raise_for_status()
             return resp.json().get("data")
+
+    async def get_product_data(
+        self,
+        product_code: str,
+        site_code: str,
+        year_month: str,
+        table: str = "countdata",
+        cache_dir: Path | str | None = None,
+    ) -> list[dict]:
+        """Download and parse one basic-package CSV table for a product/site/month.
+
+        GET {NEON_API_BASE}/data/{product}/{site}/{year_month} lists the
+        month's files; the basic-package CSV whose name contains ``table`` is
+        downloaded and parsed with the stdlib csv module. With ``cache_dir``,
+        the CSV is stored there and re-runs read it without the network.
+
+        Note (2026-11-20): this endpoint answered 403 "Access Denied" without
+        an API token from the runner's cloud environment, while /sites and
+        /products answered 200. Set NEON_API_TOKEN.
+        """
+        cache_path = None
+        if cache_dir is not None:
+            cache_path = Path(cache_dir) / f"{product_code}_{site_code}_{year_month}_{table}.csv"
+            if cache_path.exists():
+                return list(csv.DictReader(io.StringIO(cache_path.read_text())))
+
+        async with httpx.AsyncClient(headers=self._headers, timeout=120) as client:
+            resp = await http_get_with_retry(
+                client, f"{NEON_API_BASE}/data/{product_code}/{site_code}/{year_month}",
+                params={"package": "basic"},
+            )
+            if resp.status_code == 404:
+                return []
+            resp.raise_for_status()
+            files = (resp.json().get("data") or {}).get("files", [])
+            matches = [f for f in files
+                       if table in f.get("name", "") and f.get("name", "").endswith(".csv")
+                       and "basic" in f.get("name", "")]
+            if not matches:
+                return []
+            await asyncio.sleep(0.5)  # NEON asks for sequential, gentle requests
+            data = await http_get_with_retry(client, matches[0]["url"])
+            data.raise_for_status()
+            text = data.text
+
+        if cache_path is not None:
+            cache_path.parent.mkdir(parents=True, exist_ok=True)
+            cache_path.write_text(text)
+        return list(csv.DictReader(io.StringIO(text)))
 
     async def search(self, params: SearchParams) -> list[EcologicalObservation]:
         """
