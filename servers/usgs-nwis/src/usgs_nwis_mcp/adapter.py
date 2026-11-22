@@ -15,10 +15,12 @@ This is the bridge adapter for Phase 2 watershed monitoring agents.
 
 from __future__ import annotations
 
+import json
 import logging
 import os
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from math import radians, sin, cos, sqrt, atan2
+from pathlib import Path
 from typing import Optional
 
 import httpx
@@ -239,6 +241,110 @@ class USGSNWISAdapter(EcologicalAdapter):
                         observations.append(obs)
 
         return observations[:params.limit]
+
+    async def _find_sites_near_public(
+        self, lat: float, lon: float, radius_km: float
+    ) -> list[dict]:
+        """Public wrapper around _find_sites_near for use by baselines module."""
+        async with httpx.AsyncClient(timeout=30, headers=self._headers()) as client:
+            sites = await self._find_sites_near(client, lat, lon, radius_km)
+        return [{"site_id": f["properties"]["id"], "id": f["properties"]["id"]} for f in sites]
+
+    async def get_daily_record(
+        self,
+        site_id: str,
+        parameter_code: str = "00060",
+        start_date: str | None = None,
+        end_date: str | None = None,
+    ) -> list[tuple[date, float]]:
+        """Full daily-mean record for one monitoring location, oldest first.
+
+        Pagination notes (confirmed from USGS OGC API v0 docs and existing adapter
+        usage; a live call could not be made in the current sandbox environment):
+        - The API returns a GeoJSON FeatureCollection with a top-level "links" array.
+        - Pagination uses rel="next" links — follow the "href" until no next link.
+        - Maximum page size accepted: 1000 items (use limit=1000).
+        - For USGS-11467000 (Russian River near Guerneville), daily mean discharge
+          records start circa 1941-10-01, giving 80+ years of data. The adapter's
+          temporal_coverage_start of "2007-10-01" describes continuous 15-min data
+          only; daily values go back significantly further for long-running gauges.
+
+        Results are cached under ~/.kinship-earth/cache/usgs-daily/ for 7 days.
+        """
+        if not site_id.startswith("USGS-"):
+            site_id = f"USGS-{site_id}"
+
+        cache_dir = Path.home() / ".kinship-earth" / "cache" / "usgs-daily"
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        safe_name = site_id.replace("/", "_")
+        cache_file = cache_dir / f"{safe_name}_{parameter_code}.json"
+
+        if cache_file.exists():
+            try:
+                cached = json.loads(cache_file.read_text())
+                from datetime import datetime as _dt
+                fetch_date = _dt.fromisoformat(cached["fetched_at"]).date()
+                if (_dt.now().date() - fetch_date).days < 7:
+                    return [(date.fromisoformat(d), v) for d, v in cached["records"]]
+            except Exception:
+                pass
+
+        query_params: dict = {
+            "monitoring_location_id": site_id,
+            "parameter_code": parameter_code,
+            "statistic_id": "00003",  # daily mean
+            "limit": 1000,
+            "f": "json",
+        }
+        if start_date:
+            end = end_date or datetime.now().strftime("%Y-%m-%d")
+            query_params["datetime"] = f"{start_date}/{end}"
+
+        records: list[tuple[date, float]] = []
+        url: str | None = f"{BASE_URL}/collections/daily/items"
+        next_params: dict | None = query_params
+
+        async with httpx.AsyncClient(timeout=60, headers=self._headers()) as client:
+            while url is not None:
+                resp = await http_get_with_retry(client, url, params=next_params)
+                next_params = None  # only pass params on the first request
+
+                if resp.status_code != 200:
+                    break
+
+                data = resp.json()
+                for feature in data.get("features", []):
+                    props = feature.get("properties", {})
+                    value_str = props.get("value")
+                    time_str = props.get("time")
+                    if not value_str or not time_str or value_str in ("-999999", "-999999.00"):
+                        continue
+                    try:
+                        obs_date = datetime.fromisoformat(time_str).date()
+                        obs_value = float(value_str)
+                        records.append((obs_date, obs_value))
+                    except (ValueError, TypeError):
+                        continue
+
+                # Follow the next link if present
+                url = None
+                for link in data.get("links", []):
+                    if link.get("rel") == "next":
+                        url = link.get("href")
+                        break
+
+        records.sort(key=lambda r: r[0])
+
+        if records:
+            try:
+                cache_file.write_text(json.dumps({
+                    "fetched_at": datetime.now().isoformat(),
+                    "records": [(d.isoformat(), v) for d, v in records],
+                }))
+            except Exception:
+                pass
+
+        return records
 
     async def get_by_id(self, source_id: str) -> Optional[EcologicalObservation]:
         """USGS doesn't support fetching individual observations by our composite ID."""

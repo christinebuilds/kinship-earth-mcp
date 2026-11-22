@@ -30,7 +30,7 @@ async def build_ecosystem_state(
     ebird_adapter=None,
     gbif_adapter=None,
     period_days: int = 30,
-    baseline_years: int = 5,
+    baseline_years: int = 30,
     recent_health_scores: list[float] | None = None,
 ) -> EcosystemState:
     """Build a current EcosystemState for a location."""
@@ -98,7 +98,9 @@ async def build_ecosystem_state(
 
     # 4. Baselines
     baseline = await compute_baselines_from_era5(era5_adapter, location.lat, location.lng, now, years_back=baseline_years)
-    usgs_baseline = await compute_baselines_from_usgs(usgs_adapter, location.lat, location.lng, now)
+    usgs_baseline = await compute_baselines_from_usgs(
+        usgs_adapter, location.lat, location.lng, now, current_flow=streamflow
+    )
 
     # 5. Deviations
     deviations = []
@@ -109,10 +111,13 @@ async def build_ecosystem_state(
         d = compute_deviation(temp_mean, baseline.temp_mean_c, baseline.temp_std_c or 2.0)
         deviations.append(round(max(-1.0, min(1.0, d / 3.0)), 3))
 
-    streamflow_baseline = usgs_baseline.get("streamflow_mean_cfs")
-    if streamflow is not None and streamflow_baseline is not None:
-        std = usgs_baseline.get("streamflow_std_cfs", streamflow_baseline * 0.3)
-        d = compute_deviation(streamflow, streamflow_baseline, std)
+    streamflow_baseline_val = usgs_baseline.get("streamflow_mean_cfs")
+    streamflow_percentile_val = usgs_baseline.get("streamflow_percentile")
+    streamflow_baseline_kind = usgs_baseline.get("baseline_kind")
+
+    if streamflow is not None and streamflow_baseline_val is not None:
+        std = usgs_baseline.get("streamflow_std_cfs", streamflow_baseline_val * 0.3)
+        d = compute_deviation(streamflow, streamflow_baseline_val, std)
         deviations.append(round(max(-1.0, min(1.0, d / 3.0)), 3))
 
     # 6. Health score and trend
@@ -127,7 +132,9 @@ async def build_ecosystem_state(
         timestamp=now,
         period_days=period_days,
         streamflow_cfs=streamflow,
-        streamflow_baseline=streamflow_baseline,
+        streamflow_baseline=streamflow_baseline_val,
+        streamflow_percentile=streamflow_percentile_val,
+        streamflow_baseline_kind=streamflow_baseline_kind,
         precipitation_7d_mm=precip_7d,
         species_richness=species_richness,
         species_baseline=baseline.species_richness_mean,

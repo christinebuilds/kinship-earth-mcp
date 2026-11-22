@@ -117,6 +117,10 @@ These combine multiple data sources in a single answer:
 
 > "What data products does NEON collect?"
 
+### What "normal" means
+
+Streamflow baselines are built from a single gauge's own day-of-year record (the full daily record since the gauge was installed, typically 40–80 years), so "normal" means *this place's own history for this time of year*, not a regional average. Climate normals use a 30-year window and report a linear trend in °C per decade so you can see whether this location is warming.
+
 ---
 
 ## Available MCP Tools

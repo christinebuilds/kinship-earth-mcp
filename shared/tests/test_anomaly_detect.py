@@ -118,3 +118,29 @@ def test_anomaly_id_format():
     assert "anomaly:" in aid
     assert "2023-07-15" in aid
     assert "temperature" in aid
+
+
+# --- Percentile-based flow anomaly tests (spec 015) ---
+
+def test_flow_detector_percentile_low_fires_warning():
+    """Percentile=3 should produce a warning flow anomaly with 'percentile' in description."""
+    state = _make_state(streamflow_cfs=50.0, streamflow_baseline=300.0, streamflow_percentile=3.0)
+    anomalies = FlowDetector().detect(location=loc, observations=[], state=state)
+    assert len(anomalies) == 1
+    assert "percentile" in anomalies[0].description.lower()
+    assert anomalies[0].severity in ("warning", "critical")
+
+
+def test_flow_detector_percentile_median_no_anomaly():
+    """Percentile=50 should not fire."""
+    state = _make_state(streamflow_cfs=300.0, streamflow_baseline=300.0, streamflow_percentile=50.0)
+    anomalies = FlowDetector().detect(location=loc, observations=[], state=state)
+    assert len(anomalies) == 0
+
+
+def test_flow_detector_no_percentile_uses_existing_path():
+    """Without streamflow_percentile, the percent-of-mean fallback must still work."""
+    state = _make_state(streamflow_cfs=30.0, streamflow_baseline=100.0)
+    anomalies = FlowDetector().detect(location=loc, observations=[], state=state)
+    assert len(anomalies) == 1
+    assert "drought" in anomalies[0].description
