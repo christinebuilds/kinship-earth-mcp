@@ -1,6 +1,6 @@
 # STATE — Kinship Earth MCP
 
-_Last updated: 2026-11-20 by Claude (runner wake 11)_
+_Last updated: 2026-11-23 by Claude (runner wake 12)_
 
 ## Where we are
 Direction: `docs/DIRECTION.md` (read first). "Is this normal for here, and
@@ -24,7 +24,7 @@ Open-Meteo archive and NEON. `api.inaturalist.org` is still refused.
 
 ## Next up (no decision needed)
 1. Each wake, first: triage open `bug` issues without `fix-ready` (none on
-   2026-11-20).
+   2026-11-23).
 2. Spec 016 is blocked on drought sources (Radar). Built: replay engine,
    scoring (data gaps set aside, not counted as misses), CLI
    `tools/replay_scorecard.py`, figures. `canon/events/reference_events.yaml`
@@ -40,8 +40,7 @@ Open-Meteo archive and NEON. `api.inaturalist.org` is still refused.
    canon/snapshots/neon/, writes result JSON, figure, updates node), commit
    snapshot + figure, README paragraph, then ask Christine to review the
    node (status stays `conjecture` until she does).
-4. Issue #18 (`data-gap`: neighborhood flood outlook): find the open data,
-   write a spec, file a Radar decision on whether to queue it.
+4. Issue #18: spec 023 written (`proposed`), Radar asks whether to queue it.
 5. Write specs 019–021 (satellite source cards, canon MCP tools, canon CI).
    Spec buffer is EMPTY: 0 ready (016, 018 blocked). Do this next if
    nothing unblocks.
@@ -76,6 +75,7 @@ Project Radar (https://claude.ai/artifact/4e5P3qeCmC1rctQUrn651Q):
 - `EcologicalGraph` keeps one edge per node pair.
 
 ## Recently done
+- 2026-11-23 — Spec 023 written (flood outlook, from issue #18)
 - 2026-11-20 — Spec 018 built offline (NEON download, Taylor check, node file)
 - 2026-11-19 — Spec 016: sourced flood events, scorecard CLI; held for droughts
 - 2026-11-18 — Spec 016 part 1: replay engine and scoring, 5 tests

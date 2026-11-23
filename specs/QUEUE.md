@@ -37,12 +37,14 @@
 | 18 | `018-first-node-taylor.md` | blocked | 2026-11-16 | | Phase 6. Built 2026-11-20: NEON get_product_data (cached), check runner with bootstrap CI + figure, node file (status conjecture until reviewed), stubs, 3 tests, graph load verified. Blocked: NEON data endpoint returns 403 without an API token (Radar `kinship-neon-token`). `ecology_memory_recall` cannot search patterns by name; left to spec 020 |
 | 19 | `019-satellite-source-cards.md` | queued | | | Source cards + first greenness adapter |
 | 22 | `022-neighborhood-companion.md` | done | 2026-11-14 | 2026-11-14 | Alongside river work: `ecology_whats_changed`, arrivals and departures near home. Not yet tried against live iNaturalist (host blocked for the runner) |
+| 23 | `023-neighborhood-flood-outlook.md` | proposed | | | From issue #18. Written 2026-11-23; waiting on Radar `kinship-queue-flood-outlook`. Needs hosts api.open-meteo.com, api.tidesandcurrents.noaa.gov, data.sfgov.org (api.weather.gov optional) |
 | 20 | `020-canon-mcp-tools.md` | queued | | | canon_list/get/neighbors/check/propose |
 | 21 | `021-canon-ci-and-contributing.md` | queued | | | CI validation + pattern/evidence/edge PR guide |
 
 ### Status Key
 - `ready` — spec is written, detailed, and executable autonomously
 - `queued` — placeholder, spec not yet written (session should skip and flag)
+- `proposed` — spec written, waiting on Christine's decision to queue it
 - `in_progress` — currently being worked on
 - `done` — completed, committed, pushed
 - `blocked` — cannot proceed, see notes
