@@ -804,9 +804,10 @@ async def ecology_memory_recall(
     radius_km: float = 50,
     scientific_name: Optional[str] = None,
     depth: int = 2,
+    pattern: Optional[str] = None,
 ) -> dict:
     """
-    Recall what the knowledge graph knows about a location or species.
+    Recall what the knowledge graph knows about a location, species or pattern.
 
     Searches the ecological memory for entities, relationships, and
     temporal facts. Returns connected entities, co-occurring species,
@@ -819,14 +820,37 @@ async def ecology_memory_recall(
         radius_km: Search radius (default 50 km).
         scientific_name: Species to recall memory for.
         depth: How many relationship hops to traverse (default 2).
+        pattern: A canon pattern by id, name or alias (e.g. "Taylor's law").
     """
     from kinship_shared.graph_schema import make_species_id, make_location_id
 
+    pattern_result = None
+    if pattern:
+        from kinship_shared.canon_tools import canon_get
+        from kinship_shared.graph_schema import make_pattern_id
+        node = canon_get(pattern)
+        if node is None:
+            pattern_result = {"query": pattern, "found": False,
+                              "message": f"No canon pattern matches '{pattern}'"}
+        else:
+            pattern_result = {"id": node["id"], "name": node["name"], "status": node["status"],
+                              "statement_plain": node["statement_plain"], "file": node["file"]}
+
     await _ensure_graph()
     if not _graph_initialized:
+        if pattern_result is not None:
+            return {"pattern": pattern_result, "message": "Knowledge graph not available"}
         return {"memory": [], "message": "Knowledge graph not available"}
 
-    results: dict = {"query": {"lat": lat, "lon": lon, "scientific_name": scientific_name}}
+    results: dict = {"query": {"lat": lat, "lon": lon, "scientific_name": scientific_name,
+                               "pattern": pattern}}
+    if pattern_result is not None:
+        if pattern_result.get("id"):
+            pid = make_pattern_id(pattern_result["id"])
+            if await _graph.get_entity(pid):
+                pattern_result["graph_id"] = pid
+                pattern_result["neighbors"] = (await _graph.get_neighbors(pid, depth=depth)).get("neighbors", [])
+        results["pattern"] = pattern_result
 
     # Species recall
     if scientific_name:
@@ -872,6 +896,109 @@ async def ecology_memory_recall(
     }
 
     return results
+
+
+@mcp.tool()
+async def canon_list(status: Optional[str] = None, kind: Optional[str] = None,
+                     layer: Optional[str] = None) -> dict:
+    """
+    List the ecological patterns Kinship Earth tracks (the canon).
+
+    Each entry gives the pattern's id, name, kind, status as stored
+    (conjecture, supported, contested, ...), a one-line plain statement,
+    and whether its last check passed.
+
+    Example: canon_list(status="conjecture")
+
+    Args:
+        status: Only patterns with this status.
+        kind: Only this kind (empirical_law, theory, model, conjecture, open_problem, rule_of_thumb).
+        layer: Only this layer (organism, population, community, ecosystem, macro, cross_field).
+    """
+    from kinship_shared import canon_tools
+    try:
+        items = canon_tools.canon_list(status=status, kind=kind, layer=layer)
+    except Exception as e:
+        return {"error": f"Could not read the canon: {e}"}
+    return {"count": len(items), "patterns": items}
+
+
+@mcp.tool()
+async def canon_get(pattern: str) -> dict:
+    """
+    Get one pattern in full: statement, evidence, where it holds, known
+    exceptions, checks, connections and the plain-language write-up.
+
+    Accepts an id, name or alias, e.g. canon_get("Taylor's law").
+
+    Args:
+        pattern: Pattern id, name or alias.
+    """
+    from kinship_shared import canon_tools
+    try:
+        node = canon_tools.canon_get(pattern)
+    except Exception as e:
+        return {"error": f"Could not read the canon: {e}"}
+    return node or {"found": False, "message": f"No canon pattern matches '{pattern}'"}
+
+
+@mcp.tool()
+async def canon_neighbors(pattern: str, depth: int = 1) -> dict:
+    """
+    What a pattern connects to: other patterns it derives from, supports,
+    contradicts or mirrors in another field, in both directions. Ends that
+    are not written yet are marked as stubs.
+
+    Example: canon_neighbors("taylors-power-law")
+
+    Args:
+        pattern: Pattern id, name or alias.
+        depth: How many hops to follow (default 1).
+    """
+    from kinship_shared import canon_tools
+    try:
+        return canon_tools.canon_neighbors(pattern, depth=depth)
+    except Exception as e:
+        return {"error": f"Could not read the canon: {e}"}
+
+
+@mcp.tool()
+async def canon_check_status(pattern: str) -> dict:
+    """
+    When each of a pattern's checks last ran against real data, and whether
+    it passed. Reads stored results only; it does not run the check.
+
+    Example: canon_check_status("Taylor's law")
+
+    Args:
+        pattern: Pattern id, name or alias.
+    """
+    from kinship_shared import canon_tools
+    try:
+        return {"pattern": pattern, "checks": canon_tools.canon_check_status(pattern)}
+    except Exception as e:
+        return {"error": f"Could not read the canon: {e}"}
+
+
+@mcp.tool()
+async def canon_propose(node_yaml: str, narrative: str = "") -> dict:
+    """
+    Check a draft pattern before anyone opens a pull request. Validates the
+    YAML against the canon schema, flags existing patterns with the same
+    name or alias (one pattern, one node), and returns the file text it
+    would have. Writes nothing and opens nothing.
+
+    Example: canon_propose("id: species-area-relationship\nname: ...", "Arrhenius 1921 ...")
+
+    Args:
+        node_yaml: The node's front matter as YAML.
+        narrative: Plain-language write-up for the body (optional).
+    """
+    from kinship_shared import canon_tools
+    try:
+        return canon_tools.canon_propose(node_yaml, narrative)
+    except Exception as e:
+        return {"error": f"Could not check the proposal: {e}"}
 
 
 @mcp.tool()

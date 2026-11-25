@@ -2,6 +2,8 @@
 Tests for memory-aware MCP tools (Phase 4.2).
 """
 
+from pathlib import Path
+
 import pytest
 
 from kinship_orchestrator.server import (
@@ -99,3 +101,37 @@ async def test_memory_recall_by_location():
     result = await ecology_memory_recall(lat=42.0, lon=-71.0)
     assert "location" in result
     assert "graph_size" in result
+
+
+# ---------------------------------------------------------------------------
+# Spec 020: canon tools and recall by pattern
+# ---------------------------------------------------------------------------
+
+
+def test_canon_tools_registered():
+    names = set(mcp._tool_manager._tools.keys())
+    assert {"canon_list", "canon_get", "canon_neighbors",
+            "canon_check_status", "canon_propose"} <= names
+
+
+@pytest.mark.asyncio
+async def test_memory_recall_by_pattern_name(tmp_path, monkeypatch):
+    from kinship_shared.canon_loader import canon_to_graph, load_canon
+    import kinship_orchestrator.server as srv
+    from kinship_shared.graph_store import EcologicalGraph
+
+    graph = EcologicalGraph(db_path=str(tmp_path / "g.db"))
+    await canon_to_graph(load_canon(Path(__file__).resolve().parents[3] / "canon" / "patterns"), graph)
+    monkeypatch.setattr(srv, "_graph", graph)
+    monkeypatch.setattr(srv, "_graph_initialized", True)
+
+    async def _noop():
+        return None
+    monkeypatch.setattr(srv, "_ensure_graph", _noop)
+
+    res = await srv.ecology_memory_recall(pattern="Taylor's law")
+    assert res["pattern"]["id"] == "taylors-power-law"
+    assert res["pattern"]["graph_id"] == "pattern:taylors-power-law"
+    assert res["pattern"]["status"] == "conjecture"
+    missing = await srv.ecology_memory_recall(pattern="no such pattern")
+    assert missing["pattern"]["found"] is False

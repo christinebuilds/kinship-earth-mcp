@@ -169,11 +169,14 @@ Connect by linking identifiers and using their data as evidence, never by mergin
 
 ## Agent interface (new MCP tools)
 
+Built in spec 020 (2026-11-25):
+
 - `canon_list(layer?, status?, kind?)` — browse nodes.
-- `canon_get(id)` — full node with evidence, checks, edges.
-- `canon_neighbors(id, edge_type?)` — walk the graph; `ANALOG_OF` across fields is the headline query.
-- `canon_check(id, region?, adapter?)` — run a node's check against live data, optionally scoped to a place; returns fitted parameters and whether the regime held.
-- `canon_propose(node_yaml)` — draft a PR from an agent session, for human review.
+- `canon_get(pattern)` — full node with evidence, checks, edges; accepts id, name or alias.
+- `canon_neighbors(pattern, depth?)` — walk edges both ways; unwritten ends are marked as stubs. (`edge_type` filter not built yet.)
+- `canon_check_status(pattern)` — stored check results only. The originally planned `canon_check` (run a check live from a tool call) was deliberately not built: checks are slow and need network, so running them belongs to CI and the nightly job (spec 021).
+- `canon_propose(node_yaml, narrative?)` — validates a draft and flags duplicates; returns the file text. It writes nothing and opens no pull request.
+- `ecology_memory_recall(pattern=...)` finds a pattern in the knowledge graph by name.
 
 An agent asked "what do we know about how abundance scales with body size, and where does it break?" should be able to answer from the canon with citations and a fresh check, not from training-data vibes.
 

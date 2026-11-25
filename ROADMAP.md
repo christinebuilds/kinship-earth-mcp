@@ -221,7 +221,7 @@ Existing search results get re-ranked based on graph context.
 ### Milestone 6.3 — Pattern library (specs 017–018, 020–021)
 - [x] Pattern file format, validator, graph extension (spec 017) ✅ 2026-11-12
 - [ ] First pattern check (Taylor's power law on NEON bird counts) — built, waiting on NEON token
-- [ ] MCP tools for the library
+- [x] MCP tools for the library (spec 020) ✅ 2026-11-25
 - [ ] CI and contributor guide
 
 ### Milestone 6.4 — Satellite base layer (spec 019)

@@ -38,7 +38,7 @@
 | 19 | `019-satellite-source-cards.md` | blocked | 2026-11-24 | | Written 2026-11-24. Source cards + MODIS greenness adapter. Blocked: every satellite host refused (modis.ornl.gov and others listed in the spec) |
 | 22 | `022-neighborhood-companion.md` | done | 2026-11-14 | 2026-11-14 | Alongside river work: `ecology_whats_changed`, arrivals and departures near home. Not yet tried against live iNaturalist (host blocked for the runner) |
 | 23 | `023-neighborhood-flood-outlook.md` | proposed | | | From issue #18. Written 2026-11-23; waiting on Radar `kinship-queue-flood-outlook`. Needs hosts api.open-meteo.com, api.tidesandcurrents.noaa.gov, data.sfgov.org (api.weather.gov optional) |
-| 20 | `020-canon-mcp-tools.md` | ready | 2026-11-24 | | Written 2026-11-24. canon_list/get/neighbors/check_status/propose + recall by pattern. Fully offline |
+| 20 | `020-canon-mcp-tools.md` | done | 2026-11-24 | 2026-11-25 | Five canon tools + ecology_memory_recall(pattern=...); 15 tests. Fully offline |
 | 21 | `021-canon-ci-and-contributing.md` | queued | | | CI validation + pattern/evidence/edge PR guide |
 
 ### Status Key
@@ -54,6 +54,6 @@
 - **Specs ready:** 0, plus 3 blocked on network access
 - **Specs queued (need writing):** 3
 - **Specs done:** 16
-- **Buffer:** 1 ready (020). 016, 018, 019 blocked on hosts or the NEON token; 021 to write
+- **Buffer:** 0 ready. 016, 018, 019 blocked on hosts or the NEON token; 023 proposed; 021 to write
 
 > When buffer drops to 2 or fewer, the next interactive session should prioritize writing more specs.
