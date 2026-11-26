@@ -133,6 +133,8 @@ These combine multiple data sources in a single answer:
 | `canon_check_status` | When a pattern was last checked against real data, and whether it passed |
 | `canon_propose` | Check a draft pattern (schema, duplicates) before opening a pull request |
 
+To add a pattern yourself, see [docs/CONTRIBUTING-canon.md](docs/CONTRIBUTING-canon.md).
+
 **What "normal" means.** River flow is compared with one nearby USGS gauge's own daily record for the same two weeks of the year, over every year the gauge has measured (often 50 to 85 years), and reported as a percentile that names the gauge and the record length. Climate normals are the 30 years before this one for the same time of year, with the warming or cooling trend per decade reported alongside.
 
 You can also run individual data source servers for more granular access:

@@ -145,6 +145,8 @@ Twenty nodes is a weekend of writing for someone who knows the literature and a 
 
 ## Collaboration model: Mathlib, not Wikipedia
 
+How to contribute in practice: [CONTRIBUTING-canon.md](CONTRIBUTING-canon.md). Pull requests must pass `tools/canon_ci.py`.
+
 Mathlib works because the unit of contribution is a pull request, review is public, duplication is refused, and the library has maintainers whose job is canonization rather than authorship. Copy that.
 
 - **Unit of contribution: a PR.** Three kinds — new node, new evidence or check on an existing node, new edge. Small PRs merge fast.

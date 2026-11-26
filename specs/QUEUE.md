@@ -39,7 +39,7 @@
 | 22 | `022-neighborhood-companion.md` | done | 2026-11-14 | 2026-11-14 | Alongside river work: `ecology_whats_changed`, arrivals and departures near home. Not yet tried against live iNaturalist (host blocked for the runner) |
 | 23 | `023-neighborhood-flood-outlook.md` | proposed | | | From issue #18. Written 2026-11-23; waiting on Radar `kinship-queue-flood-outlook`. Needs hosts api.open-meteo.com, api.tidesandcurrents.noaa.gov, data.sfgov.org (api.weather.gov optional) |
 | 20 | `020-canon-mcp-tools.md` | done | 2026-11-24 | 2026-11-25 | Five canon tools + ecology_memory_recall(pattern=...); 15 tests. Fully offline |
-| 21 | `021-canon-ci-and-contributing.md` | queued | | | CI validation + pattern/evidence/edge PR guide |
+| 21 | `021-canon-ci-and-contributing.md` | blocked | 2026-11-26 | | Parts 1–2 done 2026-11-26: tools/canon_ci.py, docs/CONTRIBUTING-canon.md, 6 tests. Part 3 (workflow files, incl. the approved CI split that unsticks PR #17) needs a session allowed to edit .github/workflows |
 
 ### Status Key
 - `ready` — spec is written, detailed, and executable autonomously
@@ -54,6 +54,6 @@
 - **Specs ready:** 0, plus 3 blocked on network access
 - **Specs queued (need writing):** 3
 - **Specs done:** 16
-- **Buffer:** 0 ready. 016, 018, 019 blocked on hosts or the NEON token; 023 proposed; 021 to write
+- **Buffer:** 0 ready. 016, 018, 019 blocked on hosts or the NEON token; 021 part 3 needs workflow-edit permission; 023 proposed
 
 > When buffer drops to 2 or fewer, the next interactive session should prioritize writing more specs.

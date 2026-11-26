@@ -222,7 +222,7 @@ Existing search results get re-ranked based on graph context.
 - [x] Pattern file format, validator, graph extension (spec 017) ✅ 2026-11-12
 - [ ] First pattern check (Taylor's power law on NEON bird counts) — built, waiting on NEON token
 - [x] MCP tools for the library (spec 020) ✅ 2026-11-25
-- [ ] CI and contributor guide
+- [x] CI checks and contributor guide (spec 021; workflow wiring pending) ✅ 2026-11-26
 
 ### Milestone 6.4 — Satellite base layer (spec 019)
 - [ ] Source cards: live greenness, Rangeland Analysis Platform, AlphaEarth embeddings, snowpack
