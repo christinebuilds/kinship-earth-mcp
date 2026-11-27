@@ -1,6 +1,6 @@
 # STATE — Kinship Earth MCP
 
-_Last updated: 2026-11-26 by Claude (runner wake 15)_
+_Last updated: 2026-11-27 by Claude (runner wake 16)_
 
 ## Where we are
 Direction: `docs/DIRECTION.md` (read first). "Is this normal for here, and
@@ -24,7 +24,7 @@ Open-Meteo archive and NEON. `api.inaturalist.org` is still refused.
 
 ## Next up (no decision needed)
 1. Each wake, first: triage open `bug` issues without `fix-ready` (none on
-   2026-11-26).
+   2026-11-27).
 2. Spec 016 is blocked on drought sources (Radar). Built: replay engine,
    scoring (data gaps set aside, not counted as misses), CLI
    `tools/replay_scorecard.py`, figures. `canon/events/reference_events.yaml`
@@ -45,10 +45,8 @@ Open-Meteo archive and NEON. `api.inaturalist.org` is still refused.
    workflow files, needs a session allowed to edit `.github/workflows`; the
    exact YAML is in the spec and in this file's Waiting list.
 6. Spec 019 (satellite cards + MODIS greenness) written, blocked on hosts.
-7. Nothing else is runnable. If still blocked next wake, write the next
-   seed-canon spec (docs/CANON.md "Seed canon": nodes 5, 14, 15) so the
-   buffer is not empty, and file one Radar row asking for a single
-   Settings visit.
+7. Build spec 024 next (streamflow recession law node): `ready`, needs
+   only USGS, which works. First river pattern; tracks drift by decade.
 
 ## Waiting on Christine
 Project Radar (https://claude.ai/artifact/4e5P3qeCmC1rctQUrn651Q):
@@ -80,6 +78,7 @@ Project Radar (https://claude.ai/artifact/4e5P3qeCmC1rctQUrn651Q):
 - `EcologicalGraph` keeps one edge per node pair.
 
 ## Recently done
+- 2026-11-27 — Spec 024 written (recession law; GBIF/OBIS also blocked)
 - 2026-11-26 — Spec 021 parts 1–2: canon CI checks, contributor guide
 - 2026-11-25 — Spec 020 built: five canon tools, recall by pattern name
 - 2026-11-24 — Specs 019 (blocked on hosts) and 020 (ready) written

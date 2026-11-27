@@ -38,6 +38,7 @@
 | 19 | `019-satellite-source-cards.md` | blocked | 2026-11-24 | | Written 2026-11-24. Source cards + MODIS greenness adapter. Blocked: every satellite host refused (modis.ornl.gov and others listed in the spec) |
 | 22 | `022-neighborhood-companion.md` | done | 2026-11-14 | 2026-11-14 | Alongside river work: `ecology_whats_changed`, arrivals and departures near home. Not yet tried against live iNaturalist (host blocked for the runner) |
 | 23 | `023-neighborhood-flood-outlook.md` | proposed | | | From issue #18. Written 2026-11-23; waiting on Radar `kinship-queue-flood-outlook`. Needs hosts api.open-meteo.com, api.tidesandcurrents.noaa.gov, data.sfgov.org (api.weather.gov optional) |
+| 24 | `024-recession-law-node.md` | ready | 2026-11-27 | | Second canon node, first river pattern: −dQ/dt = a·Q^b on USGS daily records, with per-decade drift. Needs only api.waterdata.usgs.gov (reachable) |
 | 20 | `020-canon-mcp-tools.md` | done | 2026-11-24 | 2026-11-25 | Five canon tools + ecology_memory_recall(pattern=...); 15 tests. Fully offline |
 | 21 | `021-canon-ci-and-contributing.md` | blocked | 2026-11-26 | | Parts 1–2 done 2026-11-26: tools/canon_ci.py, docs/CONTRIBUTING-canon.md, 6 tests. Part 3 (workflow files, incl. the approved CI split that unsticks PR #17) needs a session allowed to edit .github/workflows |
 
@@ -54,6 +55,6 @@
 - **Specs ready:** 0, plus 3 blocked on network access
 - **Specs queued (need writing):** 3
 - **Specs done:** 16
-- **Buffer:** 0 ready. 016, 018, 019 blocked on hosts or the NEON token; 021 part 3 needs workflow-edit permission; 023 proposed
+- **Buffer:** 1 ready (024). 016, 018, 019 blocked on hosts or the NEON token; 021 part 3 needs workflow-edit permission; 023 proposed
 
 > When buffer drops to 2 or fewer, the next interactive session should prioritize writing more specs.
